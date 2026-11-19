@@ -235,3 +235,35 @@ async def test_reasoning_model_think_block_removed_and_cutoff_explained(
     state["cut_off"] = True
     with pytest.raises(ProviderError, match="used all its tokens"):
         await p.extract([IMG], "p")
+
+
+async def test_nemotron_thinking_disabled_with_fallback_when_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.services.ai import openai_compat as mod
+
+    monkeypatch.setattr(get_settings(), "nvidia_api_key", "k")
+    monkeypatch.setattr(
+        get_settings(), "nvidia_model", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+    )
+    bodies: list[dict[str, Any]] = []
+
+    def handler(r: httpx.Request) -> httpx.Response:
+        b = json.loads(r.content)
+        bodies.append(b)
+        if "chat_template_kwargs" in b and len(bodies) == 1 and handler.reject:  # type: ignore[attr-defined]
+            return httpx.Response(400, json={"error": {"message": "unknown field"}})
+        return httpx.Response(200, json={"choices": [{"message": {"content": '{"fields": {}}'}}]})
+
+    handler.reject = False  # type: ignore[attr-defined]
+    _patch_client(monkeypatch, mod, handler)
+    p = mod.nvidia()
+    await p.extract([IMG], "p")
+    assert bodies[0]["chat_template_kwargs"] == {"enable_thinking": False}
+    assert bodies[0]["max_tokens"] == 3000
+
+    bodies.clear()
+    handler.reject = True  # type: ignore[attr-defined]
+    await p.extract([IMG], "p")
+    assert "chat_template_kwargs" in bodies[0] and "chat_template_kwargs" not in bodies[1]
+    assert bodies[1]["max_tokens"] >= 8192

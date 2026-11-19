@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     nvidia_model: str = "meta/llama-3.2-90b-vision-instruct"
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
     nvidia_max_image_kb: int = 180
+    nvidia_disable_thinking: bool = True  # Nemotron: no reasoning tokens for label reading
     hf_api_key: str | None = None
     hf_model: str = "Qwen/Qwen2.5-VL-7B-Instruct"
     hf_base_url: str = "https://router.huggingface.co/v1"

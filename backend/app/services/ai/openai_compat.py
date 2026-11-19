@@ -27,6 +27,7 @@ class OpenAICompatProvider:
         model: str,
         max_image_kb: int,
         single_image: bool,
+        extra_body: dict[str, Any] | None = None,
     ) -> None:
         self.name = name
         self.api_key = api_key
@@ -34,6 +35,7 @@ class OpenAICompatProvider:
         self.model = model
         self.max_image_bytes = max_image_kb * 1024
         self.single_image = single_image
+        self.extra_body = extra_body or {}
         self.timeout = get_settings().ai_timeout_seconds
 
     def configured(self) -> bool:
@@ -47,24 +49,28 @@ class OpenAICompatProvider:
         }
 
     async def _complete(self, messages: list[dict[str, Any]], max_tokens: int = 3000) -> str:
-        if "reason" in self.model.lower() or "think" in self.model.lower():
+        thinks = "reason" in self.model.lower() or "think" in self.model.lower()
+        if thinks and not self.extra_body:
             max_tokens = max(max_tokens, _REASONING_TOKENS)
+        body: dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.1,
+            "max_tokens": max_tokens,
+        }
+        headers = {"authorization": f"Bearer {self.api_key}", "accept": "application/json"}
+        url = f"{self.base_url}/chat/completions"
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 r = await post_with_retry(
-                    client,
-                    f"{self.base_url}/chat/completions",
-                    headers={
-                        "authorization": f"Bearer {self.api_key}",
-                        "accept": "application/json",
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "temperature": 0.1,
-                        "max_tokens": max_tokens,
-                    },
+                    client, url, headers=headers, json={**body, **self.extra_body}
                 )
+                if r.status_code == 400 and self.extra_body:
+                    # The service does not accept the extra option: retry plain, with room to think.
+                    body["max_tokens"] = (
+                        max(max_tokens, _REASONING_TOKENS) if thinks else max_tokens
+                    )
+                    r = await post_with_retry(client, url, headers=headers, json=body)
         except httpx.HTTPError as e:
             raise ProviderError(f"network error ({type(e).__name__})") from e
         if r.status_code != 200:
@@ -145,6 +151,12 @@ def nvidia() -> OpenAICompatProvider:
         s.nvidia_model,
         s.nvidia_max_image_kb,
         single_image=True,
+        # Reading a label needs no step-by-step reasoning; Nemotron models can switch it off per request.
+        extra_body=(
+            {"chat_template_kwargs": {"enable_thinking": False}}
+            if s.nvidia_disable_thinking and "nemotron" in s.nvidia_model.lower()
+            else None
+        ),
     )
 
 

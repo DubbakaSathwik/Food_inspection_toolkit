@@ -198,3 +198,8 @@ Owner tried `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`; extraction failed w
 providers now remove `<think>…</think>` blocks, raise the token budget for models whose name contains "reason"/"think", and report
 "answer cut off: the model used all its tokens thinking" or "empty answer" instead of a generic error. Unit-tested (68 backend tests,
 88.5 %); not verified against the live NVIDIA service.
+
+### NVIDIA Nemotron: reasoning switched off (2026-11-19)
+With the larger budget the reasoning model still used all 8,192 tokens thinking. For `nemotron` models the app now sends
+`chat_template_kwargs: {"enable_thinking": false}` (setting `NVIDIA_DISABLE_THINKING`, default true); if the service answers HTTP 400
+the call is repeated without it and with the larger token budget. 69 backend tests pass (88.6 %). Not verified against the live service.
