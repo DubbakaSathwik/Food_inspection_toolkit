@@ -1,0 +1,552 @@
+[
+ {
+  "name": "Main",
+  "title": "Landing page (public)",
+  "role": "public",
+  "desktop": {
+   "source": "source/Main.dc.html",
+   "runnable": "prototype/screens/Main.html",
+   "artboard": [
+    1440,
+    3560
+   ],
+   "renderedHeightAt1440": 2747,
+   "screenshot": "screenshots/desktop/Main.jpg"
+  },
+  "mobile": {
+   "source": "source/M_Main.dc.html",
+   "runnable": "prototype/screens/M_Main.html",
+   "artboard": [
+    390,
+    6764
+   ],
+   "renderedHeightAt390": 5103,
+   "screenshot": "screenshots/mobile/M_Main.jpg"
+  }
+ },
+ {
+  "name": "SignIn",
+  "title": "Sign in / Get started (single Google button)",
+  "role": "public",
+  "desktop": {
+   "source": "source/SignIn.dc.html",
+   "runnable": "prototype/screens/SignIn.html",
+   "artboard": [
+    1440,
+    900
+   ],
+   "renderedHeightAt1440": 900,
+   "screenshot": "screenshots/desktop/SignIn.jpg"
+  },
+  "mobile": {
+   "source": "source/M_SignIn.dc.html",
+   "runnable": "prototype/screens/M_SignIn.html",
+   "artboard": [
+    390,
+    1710
+   ],
+   "renderedHeightAt390": 844,
+   "screenshot": "screenshots/mobile/M_SignIn.jpg"
+  }
+ },
+ {
+  "name": "Pending",
+  "title": "Awaiting admin approval",
+  "role": "public",
+  "desktop": {
+   "source": "source/Pending.dc.html",
+   "runnable": "prototype/screens/Pending.html",
+   "artboard": [
+    1440,
+    900
+   ],
+   "renderedHeightAt1440": 900,
+   "screenshot": "screenshots/desktop/Pending.jpg"
+  },
+  "mobile": {
+   "source": "source/M_Pending.dc.html",
+   "runnable": "prototype/screens/M_Pending.html",
+   "artboard": [
+    390,
+    1710
+   ],
+   "renderedHeightAt390": 844,
+   "screenshot": "screenshots/mobile/M_Pending.jpg"
+  }
+ },
+ {
+  "name": "InspectorDashboard",
+  "title": "Inspector dashboard",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/InspectorDashboard.dc.html",
+   "runnable": "prototype/screens/InspectorDashboard.html",
+   "artboard": [
+    1440,
+    1620
+   ],
+   "renderedHeightAt1440": 1304,
+   "screenshot": "screenshots/desktop/InspectorDashboard.jpg"
+  },
+  "mobile": {
+   "source": "source/M_InspectorDashboard.dc.html",
+   "runnable": "prototype/screens/M_InspectorDashboard.html",
+   "artboard": [
+    390,
+    4212
+   ],
+   "renderedHeightAt390": 2935,
+   "screenshot": "screenshots/mobile/M_InspectorDashboard.jpg"
+  }
+ },
+ {
+  "name": "NewInspection",
+  "title": "New inspection \u2013 photographs",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/NewInspection.dc.html",
+   "runnable": "prototype/screens/NewInspection.html",
+   "artboard": [
+    1440,
+    1560
+   ],
+   "renderedHeightAt1440": 1475,
+   "screenshot": "screenshots/desktop/NewInspection.jpg"
+  },
+  "mobile": {
+   "source": "source/M_NewInspection.dc.html",
+   "runnable": "prototype/screens/M_NewInspection.html",
+   "artboard": [
+    390,
+    4056
+   ],
+   "renderedHeightAt390": 2391,
+   "screenshot": "screenshots/mobile/M_NewInspection.jpg"
+  }
+ },
+ {
+  "name": "VerifyFields",
+  "title": "Verify extracted information",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/VerifyFields.dc.html",
+   "runnable": "prototype/screens/VerifyFields.html",
+   "artboard": [
+    1440,
+    3400
+   ],
+   "renderedHeightAt1440": 5017,
+   "screenshot": "screenshots/desktop/VerifyFields.jpg"
+  },
+  "mobile": {
+   "source": "source/M_VerifyFields.dc.html",
+   "runnable": "prototype/screens/M_VerifyFields.html",
+   "artboard": [
+    390,
+    8000
+   ],
+   "renderedHeightAt390": 7704,
+   "screenshot": "screenshots/mobile/M_VerifyFields.jpg"
+  }
+ },
+ {
+  "name": "AIReview",
+  "title": "AI review (working animation)",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/AIReview.dc.html",
+   "runnable": "prototype/screens/AIReview.html",
+   "artboard": [
+    1440,
+    1180
+   ],
+   "renderedHeightAt1440": 1183,
+   "screenshot": "screenshots/desktop/AIReview.jpg"
+  },
+  "mobile": {
+   "source": "source/M_AIReview.dc.html",
+   "runnable": "prototype/screens/M_AIReview.html",
+   "artboard": [
+    390,
+    3068
+   ],
+   "renderedHeightAt390": 2223,
+   "screenshot": "screenshots/mobile/M_AIReview.jpg"
+  }
+ },
+ {
+  "name": "InspectionResults",
+  "title": "Inspection findings",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/InspectionResults.dc.html",
+   "runnable": "prototype/screens/InspectionResults.html",
+   "artboard": [
+    1440,
+    3300
+   ],
+   "renderedHeightAt1440": 4311,
+   "screenshot": "screenshots/desktop/InspectionResults.jpg"
+  },
+  "mobile": {
+   "source": "source/M_InspectionResults.dc.html",
+   "runnable": "prototype/screens/M_InspectionResults.html",
+   "artboard": [
+    390,
+    8000
+   ],
+   "renderedHeightAt390": 7701,
+   "screenshot": "screenshots/mobile/M_InspectionResults.jpg"
+  }
+ },
+ {
+  "name": "ReportPreview",
+  "title": "Report preview",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/ReportPreview.dc.html",
+   "runnable": "prototype/screens/ReportPreview.html",
+   "artboard": [
+    1440,
+    2300
+   ],
+   "renderedHeightAt1440": 2163,
+   "screenshot": "screenshots/desktop/ReportPreview.jpg"
+  },
+  "mobile": {
+   "source": "source/M_ReportPreview.dc.html",
+   "runnable": "prototype/screens/M_ReportPreview.html",
+   "artboard": [
+    390,
+    5980
+   ],
+   "renderedHeightAt390": 4781,
+   "screenshot": "screenshots/mobile/M_ReportPreview.jpg"
+  }
+ },
+ {
+  "name": "InspectionHistory",
+  "title": "Inspection history",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/InspectionHistory.dc.html",
+   "runnable": "prototype/screens/InspectionHistory.html",
+   "artboard": [
+    1440,
+    1420
+   ],
+   "renderedHeightAt1440": 1279,
+   "screenshot": "screenshots/desktop/InspectionHistory.jpg"
+  },
+  "mobile": {
+   "source": "source/M_InspectionHistory.dc.html",
+   "runnable": "prototype/screens/M_InspectionHistory.html",
+   "artboard": [
+    390,
+    3692
+   ],
+   "renderedHeightAt390": 3369,
+   "screenshot": "screenshots/mobile/M_InspectionHistory.jpg"
+  }
+ },
+ {
+  "name": "InspectorProposals",
+  "title": "Inspector product proposals",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/InspectorProposals.dc.html",
+   "runnable": "prototype/screens/InspectorProposals.html",
+   "artboard": [
+    1440,
+    1180
+   ],
+   "renderedHeightAt1440": 1045,
+   "screenshot": "screenshots/desktop/InspectorProposals.jpg"
+  },
+  "mobile": {
+   "source": "source/M_InspectorProposals.dc.html",
+   "runnable": "prototype/screens/M_InspectorProposals.html",
+   "artboard": [
+    390,
+    3068
+   ],
+   "renderedHeightAt390": 2279,
+   "screenshot": "screenshots/mobile/M_InspectorProposals.jpg"
+  }
+ },
+ {
+  "name": "AskAI",
+  "title": "Ask AI",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/AskAI.dc.html",
+   "runnable": "prototype/screens/AskAI.html",
+   "artboard": [
+    1440,
+    1280
+   ],
+   "renderedHeightAt1440": 964,
+   "screenshot": "screenshots/desktop/AskAI.jpg"
+  },
+  "mobile": {
+   "source": "source/M_AskAI.dc.html",
+   "runnable": "prototype/screens/M_AskAI.html",
+   "artboard": [
+    390,
+    3328
+   ],
+   "renderedHeightAt390": 1992,
+   "screenshot": "screenshots/mobile/M_AskAI.jpg"
+  }
+ },
+ {
+  "name": "Profile",
+  "title": "Profile",
+  "role": "inspector",
+  "desktop": {
+   "source": "source/Profile.dc.html",
+   "runnable": "prototype/screens/Profile.html",
+   "artboard": [
+    1440,
+    1120
+   ],
+   "renderedHeightAt1440": 1046,
+   "screenshot": "screenshots/desktop/Profile.jpg"
+  },
+  "mobile": {
+   "source": "source/M_Profile.dc.html",
+   "runnable": "prototype/screens/M_Profile.html",
+   "artboard": [
+    390,
+    2912
+   ],
+   "renderedHeightAt390": 1579,
+   "screenshot": "screenshots/mobile/M_Profile.jpg"
+  }
+ },
+ {
+  "name": "AdminDashboard",
+  "title": "Admin dashboard",
+  "role": "admin",
+  "desktop": {
+   "source": "source/AdminDashboard.dc.html",
+   "runnable": "prototype/screens/AdminDashboard.html",
+   "artboard": [
+    1440,
+    1500
+   ],
+   "renderedHeightAt1440": 1105,
+   "screenshot": "screenshots/desktop/AdminDashboard.jpg"
+  },
+  "mobile": {
+   "source": "source/M_AdminDashboard.dc.html",
+   "runnable": "prototype/screens/M_AdminDashboard.html",
+   "artboard": [
+    390,
+    3900
+   ],
+   "renderedHeightAt390": 2470,
+   "screenshot": "screenshots/mobile/M_AdminDashboard.jpg"
+  }
+ },
+ {
+  "name": "ReferenceDatabase",
+  "title": "Reference database",
+  "role": "admin",
+  "desktop": {
+   "source": "source/ReferenceDatabase.dc.html",
+   "runnable": "prototype/screens/ReferenceDatabase.html",
+   "artboard": [
+    1440,
+    1340
+   ],
+   "renderedHeightAt1440": 1018,
+   "screenshot": "screenshots/desktop/ReferenceDatabase.jpg"
+  },
+  "mobile": {
+   "source": "source/M_ReferenceDatabase.dc.html",
+   "runnable": "prototype/screens/M_ReferenceDatabase.html",
+   "artboard": [
+    390,
+    3484
+   ],
+   "renderedHeightAt390": 2868,
+   "screenshot": "screenshots/mobile/M_ReferenceDatabase.jpg"
+  }
+ },
+ {
+  "name": "ProductDetail",
+  "title": "Reference product record",
+  "role": "admin",
+  "desktop": {
+   "source": "source/ProductDetail.dc.html",
+   "runnable": "prototype/screens/ProductDetail.html",
+   "artboard": [
+    1440,
+    1700
+   ],
+   "renderedHeightAt1440": 1577,
+   "screenshot": "screenshots/desktop/ProductDetail.jpg"
+  },
+  "mobile": {
+   "source": "source/M_ProductDetail.dc.html",
+   "runnable": "prototype/screens/M_ProductDetail.html",
+   "artboard": [
+    390,
+    4420
+   ],
+   "renderedHeightAt390": 2408,
+   "screenshot": "screenshots/mobile/M_ProductDetail.jpg"
+  }
+ },
+ {
+  "name": "ComplianceRules",
+  "title": "Compliance rules",
+  "role": "admin",
+  "desktop": {
+   "source": "source/ComplianceRules.dc.html",
+   "runnable": "prototype/screens/ComplianceRules.html",
+   "artboard": [
+    1440,
+    1480
+   ],
+   "renderedHeightAt1440": 1527,
+   "screenshot": "screenshots/desktop/ComplianceRules.jpg"
+  },
+  "mobile": {
+   "source": "source/M_ComplianceRules.dc.html",
+   "runnable": "prototype/screens/M_ComplianceRules.html",
+   "artboard": [
+    390,
+    3848
+   ],
+   "renderedHeightAt390": 3800,
+   "screenshot": "screenshots/mobile/M_ComplianceRules.jpg"
+  }
+ },
+ {
+  "name": "AdminProposals",
+  "title": "Admin product proposals",
+  "role": "admin",
+  "desktop": {
+   "source": "source/AdminProposals.dc.html",
+   "runnable": "prototype/screens/AdminProposals.html",
+   "artboard": [
+    1440,
+    1900
+   ],
+   "renderedHeightAt1440": 1540,
+   "screenshot": "screenshots/desktop/AdminProposals.jpg"
+  },
+  "mobile": {
+   "source": "source/M_AdminProposals.dc.html",
+   "runnable": "prototype/screens/M_AdminProposals.html",
+   "artboard": [
+    390,
+    4940
+   ],
+   "renderedHeightAt390": 3433,
+   "screenshot": "screenshots/mobile/M_AdminProposals.jpg"
+  }
+ },
+ {
+  "name": "UserManagement",
+  "title": "User management",
+  "role": "admin",
+  "desktop": {
+   "source": "source/UserManagement.dc.html",
+   "runnable": "prototype/screens/UserManagement.html",
+   "artboard": [
+    1440,
+    1620
+   ],
+   "renderedHeightAt1440": 1392,
+   "screenshot": "screenshots/desktop/UserManagement.jpg"
+  },
+  "mobile": {
+   "source": "source/M_UserManagement.dc.html",
+   "runnable": "prototype/screens/M_UserManagement.html",
+   "artboard": [
+    390,
+    4212
+   ],
+   "renderedHeightAt390": 3453,
+   "screenshot": "screenshots/mobile/M_UserManagement.jpg"
+  }
+ },
+ {
+  "name": "Analytics",
+  "title": "Analytics",
+  "role": "admin",
+  "desktop": {
+   "source": "source/Analytics.dc.html",
+   "runnable": "prototype/screens/Analytics.html",
+   "artboard": [
+    1440,
+    2050
+   ],
+   "renderedHeightAt1440": 1719,
+   "screenshot": "screenshots/desktop/Analytics.jpg"
+  },
+  "mobile": {
+   "source": "source/M_Analytics.dc.html",
+   "runnable": "prototype/screens/M_Analytics.html",
+   "artboard": [
+    390,
+    5330
+   ],
+   "renderedHeightAt390": 3078,
+   "screenshot": "screenshots/mobile/M_Analytics.jpg"
+  }
+ },
+ {
+  "name": "AuditLogs",
+  "title": "Audit logs",
+  "role": "admin",
+  "desktop": {
+   "source": "source/AuditLogs.dc.html",
+   "runnable": "prototype/screens/AuditLogs.html",
+   "artboard": [
+    1440,
+    1240
+   ],
+   "renderedHeightAt1440": 1169,
+   "screenshot": "screenshots/desktop/AuditLogs.jpg"
+  },
+  "mobile": {
+   "source": "source/M_AuditLogs.dc.html",
+   "runnable": "prototype/screens/M_AuditLogs.html",
+   "artboard": [
+    390,
+    3224
+   ],
+   "renderedHeightAt390": 2695,
+   "screenshot": "screenshots/mobile/M_AuditLogs.jpg"
+  }
+ },
+ {
+  "name": "Settings",
+  "title": "Settings (incl. Website Images)",
+  "role": "admin",
+  "desktop": {
+   "source": "source/Settings.dc.html",
+   "runnable": "prototype/screens/Settings.html",
+   "artboard": [
+    1440,
+    1700
+   ],
+   "renderedHeightAt1440": 1194,
+   "screenshot": "screenshots/desktop/Settings.jpg"
+  },
+  "mobile": {
+   "source": "source/M_Settings.dc.html",
+   "runnable": "prototype/screens/M_Settings.html",
+   "artboard": [
+    390,
+    4420
+   ],
+   "renderedHeightAt390": 1981,
+   "screenshot": "screenshots/mobile/M_Settings.jpg"
+  }
+ }
+]

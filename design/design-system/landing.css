@@ -1,0 +1,23 @@
+/* Extra rules on landing page (Main / M_Main): animated nav underline + scroll-spy, hero, feature cards, <=760px header redesign */
+.cs-btn2:hover{background:#FBF8F0 !important}
+html{scroll-behavior:smooth}
+.cs-navl{position:relative;transition:color .2s ease,background .2s ease,transform .15s ease}
+.cs-navl::after{content:"";position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:2px;background:#56703A;transform:scaleX(0);transform-origin:left;transition:transform .28s ease}
+.cs-navl:hover{background:#EEF2E1;color:#20231D !important;transform:translateY(-1px)}
+.cs-navl:hover::after,.cs-navl.on::after{transform:scaleX(1)}
+.cs-navl.on{background:#E3EACF;color:#20231D !important;font-weight:700 !important}
+.cs-navl:active{transform:scale(.95)}
+header{animation:csIn .5s ease both}
+.cs-feat{transition:background .2s ease,transform .2s ease}
+.cs-feat:hover{transform:translateY(-3px)}
+@media (max-width:760px){
+ header{gap:8px 10px !important;padding:12px 0 8px !important}
+ header>div:first-child svg{width:28px !important;height:28px !important}
+ header>div:first-child span{font-size:17px !important}
+ header>a.cs-btn{min-height:40px !important;padding:0 16px !important;font-size:13.5px !important;margin-left:auto}
+ header nav{order:3;width:100%;flex-wrap:nowrap !important;justify-content:space-between;gap:2px !important;border-top:1px solid #E5E4DA;padding-top:6px}
+ header nav a{padding:8px 8px !important;font-size:13px !important;white-space:nowrap}
+ section.cs-hero{padding:20px 0 44px !important;gap:28px !important}
+ section.cs-hero [style*="min-height: 520px"]{min-height:300px !important}
+ section.cs-hero [style*="height: 520px"]{height:300px !important}
+ .cs-feat{border-left:3px solid #9CAB84 !important;padding:8px 18px !important}

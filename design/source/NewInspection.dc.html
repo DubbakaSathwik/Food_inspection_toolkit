@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CRATE-SCAN — New Inspection</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2E6}
+a{color:#56703A}a:hover{color:#3E5228}
+*{box-sizing:border-box}
+.cs-btn,.cs-btn2,.cs-mi,.cs-row,.cs-ib,.cs-chipbtn{transition:background .15s ease,border-color .15s ease}
+.cs-nav a:hover{background:#FBF8F0}
+.cs-btn:hover{background:#485F30 !important}
+.cs-btn2:hover{background:#FBF8F0 !important;border-color:#CFCDBF !important}
+.cs-mi:hover,.cs-mi:focus-visible{background:#EEF2E1}
+.cs-row:hover{background:#FBF8F0}
+.cs-ib:hover{background:#E3EACF !important;border-color:#9CAB84 !important}
+.cs-chipbtn:hover{background:#E3EACF !important}
+.cs-card:hover{border-color:#9CAB84}
+.cs-card2 span{white-space:normal !important}
+html,body{overflow-x:hidden;max-width:100%}
+table th,table td{white-space:normal !important;overflow-wrap:anywhere}
+img,svg,table{max-width:100%}
+@media (max-width: 760px){
+ .cs-step-f{display:none !important}
+ .cs-step-c{display:block !important}
+ .cs-pbtns{display:grid !important;grid-template-columns:1fr 1fr;gap:10px !important;width:100%}
+ .cs-pbtns>*{justify-content:center;min-height:48px !important;white-space:normal;text-align:center}
+ .cs-acts{flex-wrap:wrap !important}
+ .cs-acts>*{flex:1 1 90px !important;min-height:46px !important;font-size:13.5px !important;white-space:nowrap}
+ .cs-bar{flex-direction:column !important;align-items:stretch !important}
+ .cs-bar>*,.cs-bar a{width:100%;justify-content:center}
+ .cs-card2{min-width:0 !important;overflow:hidden}
+ .cs-card2 span{overflow-wrap:anywhere}
+}
+@keyframes csIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes csFade{from{opacity:0}to{opacity:1}}
+@keyframes csSpin{to{transform:rotate(360deg)}}
+@keyframes csRipple{from{transform:scale(0);opacity:.45}to{transform:scale(4);opacity:0}}
+@keyframes csPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.18);opacity:.45}}
+@keyframes csScan{0%{top:4%}50%{top:92%}100%{top:4%}}
+@keyframes csOrbit{to{transform:rotate(360deg)}}
+@keyframes csShimmer{from{background-position:-200px 0}to{background-position:200px 0}}
+@keyframes csDots{0%,20%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+@keyframes csPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes csBar{0%{width:0}60%{width:75%}100%{width:92%}}
+@keyframes csWrite{from{width:0}to{width:100%}}
+main{animation:csIn .45s ease both}
+main>*{animation:csIn .5s ease both}
+main>*:nth-child(2){animation-delay:.05s}main>*:nth-child(3){animation-delay:.1s}main>*:nth-child(4){animation-delay:.15s}
+main>*:nth-child(5){animation-delay:.2s}main>*:nth-child(6){animation-delay:.25s}
+.cs-btn,.cs-btn2{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease,box-shadow .15s ease}
+.cs-btn:hover{box-shadow:0 4px 12px rgba(60,80,40,.25)}
+.cs-btn:active,.cs-btn2:active,.cs-ib:active,.cs-chipbtn:active{transform:scale(.96)}
+.cs-rip{position:absolute;border-radius:50%;width:40px;height:40px;margin:-20px 0 0 -20px;background:rgba(255,255,255,.55);pointer-events:none;animation:csRipple .6s ease-out forwards}
+.cs-btn2 .cs-rip,.cs-ib .cs-rip{background:rgba(86,112,58,.28)}
+.cs-ib{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease}
+.cs-working{pointer-events:none;opacity:.85}
+.cs-working::after{content:"";display:inline-block;width:14px;height:14px;margin-left:8px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:csSpin .7s linear infinite}
+.cs-row,.cs-card{transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.cs-card:hover{transform:translateY(-2px)}
+#cs-load{position:fixed;inset:0;z-index:9999;background:rgba(246,242,230,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:csFade .2s ease both}
+#cs-load.on{display:flex}
+#cs-load .ring{width:54px;height:54px;border-radius:50%;border:4px solid #DCE3C6;border-top-color:#56703A;animation:csSpin .8s linear infinite}
+#cs-load .lt{font:600 14px Manrope,sans-serif;color:#55584E}
+#cs-top{position:fixed;top:0;left:0;height:3px;width:0;background:#56703A;z-index:10000;opacity:0}
+#cs-top.go{opacity:1;animation:csBar 1.4s ease-out forwards}
+.cs-dots span{animation:csDots 1.2s infinite}.cs-dots span:nth-child(2){animation-delay:.2s}.cs-dots span:nth-child(3){animation-delay:.4s}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important}}
+@media (max-width: 760px){
+ .cs-side{flex-basis:100% !important;border-right:none !important;border-bottom:1px solid #E5E4DA}
+ .cs-side .cs-nav{flex-direction:row !important;overflow-x:auto}
+ .cs-side .cs-nav a{white-space:nowrap}
+ .cs-side .cs-foot{display:none !important}
+ .cs-hide-sm{display:none !important}
+}
+</style>
+</helmet>
+<div style="font-family: Manrope, Inter, system-ui, sans-serif; color: #20231D; background: #F6F2E6; min-height: 100vh; width: 100%">
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh">
+<aside class="cs-side" style="flex: 0 0 256px; background: #FFFFFF; border-right: 1px solid #E5E4DA; padding: 26px 18px; display: flex; flex-direction: column; gap: 28px">
+<a href="Main.dc.html" style="text-decoration: none; padding: 0 6px"><div style="display: flex; align-items: center; gap: 10px"><svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true" style="flex-shrink: 0"><path d="M4 13V6a2 2 0 0 1 2-2h7M27 4h7a2 2 0 0 1 2 2v7M36 27v7a2 2 0 0 1-2 2h-7M13 36H6a2 2 0 0 1-2-2v-7" stroke="#56703A" stroke-width="2.6" stroke-linecap="round"/><path d="M13 26c0-8 5-13 14-13 0 9-5 14-13 14" stroke="#56703A" stroke-width="2.2" stroke-linejoin="round" fill="#C5D89D"/><path d="M13 27l8-8" stroke="#56703A" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size: 19px; font-weight: 800; letter-spacing: -0.2px; color: #20231D">CRATE-SCAN</span></div></a>
+<nav class="cs-nav" aria-label="Main" style="display: flex; flex-direction: column; gap: 4px"><a href="InspectorDashboard.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>Dashboard</a><a href="NewInspection.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; background: #E3EACF; color: #20231D; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 5v14M5 12h14"/></svg>New Inspection</a><a href="InspectionHistory.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Inspection History</a><a href="InspectorProposals.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg>Product Proposals</a><a href="AskAI.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/></svg>Ask AI</a><a href="Profile.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-3.5 3.8-5 7-5s6 1.5 7 5"/></svg>Profile</a></nav>
+<div class="cs-foot" style="margin-top: auto; display: flex; flex-direction: column; gap: 4px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/></svg>Log out</a>
+</div>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 36px clamp(18px, 3.5vw, 48px) 56px; display: flex; flex-direction: column; gap: 28px; max-width: 1280px">
+<a href="InspectorDashboard.dc.html" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; text-decoration: none; color: #55584E"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back to dashboard</a>
+<header style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.4px">New Inspection</h1>
+<p style="margin: 0; font-size: 15.5px; color: #55584E">Add photographs of one packaged food product. Up to five images.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 14px">
+<a href="Profile.dc.html" aria-label="Account" style="width: 42px; height: 42px; border-radius: 21px; background: #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; text-decoration: none; flex-shrink: 0">IS</a>
+</div>
+</header>
+<ol class="cs-step-f" aria-label="Inspection progress" style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #20231D"><span style="width: 28px; height: 28px; border-radius: 14px; background: #56703A; border: 1.5px solid #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">1</span>Photographs</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">2</span>Verify Fields</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">3</span>AI Review</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">4</span>Findings</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">5</span>Report</li></ol><div class="cs-step-c" role="group" aria-label="Inspection progress" style="display: none; background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 14px 16px"><div style="display: flex; align-items: center; justify-content: space-between; gap: 10px"><span style="font-size: 12.5px; font-weight: 700; color: #686B60; letter-spacing: 0.4px">STEP 1 OF 5</span><span style="font-size: 15px; font-weight: 800; color: #56703A">Photographs</span></div><div style="height: 6px; border-radius: 3px; background: #EFEDE4; margin-top: 10px; overflow: hidden"><div style="height: 100%; width: 8%; border-radius: 3px; background: #56703A; transition: width .5s ease"></div></div></div>
+<section style="background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div><h2 style="margin: 0; font-size: 18px; font-weight: 700">Product category</h2>
+<p style="margin: 6px 0 0; font-size: 14px; color: #55584E">Selects which labelling rules are applied. Currently selected: <strong style="color: #20231D">{{chosen}}</strong></p></div>
+<div role="radiogroup" aria-label="Product category" style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="4">
+<label style="{{c.box}}"><input type="radio" name="cat" checked="{{c.selected}}" onChange="{{c.pick}}" style="accent-color: #56703A; width: 18px; height: 18px; flex-shrink: 0">{{c.label}}</label>
+</sc-for>
+</div>
+</section>
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<section style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<div><h2 style="margin: 0; font-size: 18px; font-weight: 700">Product photographs</h2><p style="margin: 4px 0 0; font-size: 14px; color: #55584E">3 of 5 added</p></div>
+<div class="cs-pbtns" style="display: flex; flex-wrap: wrap; gap: 10px"><a class="cs-btn2" href="#" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; min-height: 44px; border-radius: 10px; background: #FFFFFF; color: #20231D; border: 1px solid #E5E4DA; font-size: 14px; font-weight: 600; text-decoration: none; "><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take photo</a><a class="cs-btn2" href="#" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; min-height: 44px; border-radius: 10px; background: #FFFFFF; color: #20231D; border: 1px solid #E5E4DA; font-size: 14px; font-weight: 600; text-decoration: none; "><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 16v3h14v-3"/></svg>Choose from gallery</a></div>
+</div>
+<div style="border: 1.5px dashed #C9C6B4; border-radius: 12px; background: #FBF8F0; padding: 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; text-align: center; color: #55584E; font-size: 14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#56703A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 16v3h14v-3"/></svg><span><strong style="color: #20231D">Drop images here</strong> or use the buttons above · JPG, PNG or WebP, up to 10 MB each</span></div>
+<div role="status" style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: #FBEFD9; border: 1px solid #E8C27F; color: #6E420A; font-size: 13.5px; line-height: 1.5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A560F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.1"/></svg><span><strong>Issue found in Photo 3 (Side).</strong> The image looks blurry, so small text may be hard to read. Retake it or continue anyway. Photos 1 and 2 are fine.</span></div>
+<div style="overflow-x: auto; margin: 0 -4px; padding: 4px; -webkit-overflow-scrolling: touch"><div style="display: flex; gap: 12px; width: max-content">
+<sc-for list="{{photos}}" as="p" hint-placeholder-count="5">
+<button type="button" class="cs-btn2" aria-label="{{p.aria}}" onClick="{{p.pick}}" style="{{p.style}}"><span style="width: 96px; height: 84px; border-radius: 7px; background: #E9E5D6; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: #9CAB84">{{p.thumb}}</span><span style="font-size: 12.5px; font-weight: 700">{{p.label}}</span><span style="{{p.badgeStyle}}">{{p.badge}}</span></button>
+</sc-for></div></div>
+<div style="{{prevStyle}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px"><span style="font-size: 14px; font-weight: 800">{{prevTitle}}</span><span style="{{prevBadgeStyle}}">{{prevBadge}}</span></div>
+<div style="height: 230px; border-radius: 9px; background: #E9E5D6; display: flex; align-items: center; justify-content: center; overflow: hidden">
+<sc-if value="{{show1}}" hint-placeholder-val="{{ true }}"><div style="width: 130px; height: 190px; border-radius: 10px; background: #FBF8EE; box-shadow: 0 6px 18px rgba(60,58,40,0.18); overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0"><div style="height: 24%; background: #4F6B3A; border-radius: 10px 10px 0 0"></div><div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 10px; color: #5A5C52; font-weight: 600">Harvest Lane · Nut &amp; Seed Mix</span><span style="font-size: 15px; font-weight: 800; line-height: 1.1; color: #2A2C24">Whole Grain Muesli</span></div><div style="margin: 4px auto 0; width: 58%; height: 26%; border-radius: 0 0 60px 60px; background: #E8D3A6; border: 3px solid #F6EFE0"></div></div></sc-if>
+<sc-if value="{{show2}}" hint-placeholder-val="{{ false }}"><div style="width: 130px; height: 190px; border-radius: 10px; background: #FBF8EE; box-shadow: 0 6px 18px rgba(60,58,40,0.18); overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0"><div style="height: 8%; background: #4F6B3A; border-radius: 10px 10px 0 0"></div><div style="padding: 8px 10px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 8px; font-weight: 800; color: #2A2C24">INGREDIENTS</span><div style="height: 3px; width: 92%; background: #CFCBBB; border-radius: 2px"></div><div style="height: 3px; width: 85%; background: #CFCBBB; border-radius: 2px"></div><div style="height: 3px; width: 96%; background: #CFCBBB; border-radius: 2px"></div><div style="height: 3px; width: 70%; background: #CFCBBB; border-radius: 2px"></div><div style="height: 3px; width: 88%; background: #CFCBBB; border-radius: 2px"></div><div style="height: 3px; width: 60%; background: #CFCBBB; border-radius: 2px"></div><span style="font-size: 8px; font-weight: 800; color: #2A2C24; margin-top: 2px">NUTRITION / 100 g</span><div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div></div><div style="display: flex; gap: 6px; align-items: center; margin-top: 2px"><div style="border: 1px solid #9C9886; padding: 2px 4px; font-size: 7px; color: #44463D">Lic. No. 1002…</div><div style="width: 22px; height: 22px; background: repeating-linear-gradient(90deg,#3A3C34 0 2px,#fff 2px 3px)"></div></div></div></div></sc-if>
+<sc-if value="{{show3}}" hint-placeholder-val="{{ false }}"><span style="filter: blur(1.4px); display: inline-flex"><div style="width: 100px; height: 190px; border-radius: 10px; background: #FBF8EE; box-shadow: 0 6px 18px rgba(60,58,40,0.18); overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0"><div style="height: 24%; background: #4F6B3A; border-radius: 10px 10px 0 0"></div><div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 10px; color: #5A5C52; font-weight: 600">Harvest Lane</span><span style="font-size: 15px; font-weight: 800; line-height: 1.1; color: #2A2C24">Whole Grain Muesli</span></div><div style="margin: 4px auto 0; width: 58%; height: 26%; border-radius: 0 0 60px 60px; background: #E8D3A6; border: 3px solid #F6EFE0"></div></div></span></sc-if>
+<sc-if value="{{showEmpty}}" hint-placeholder-val="{{ false }}"><span style="display: flex; flex-direction: column; align-items: center; gap: 8px; color: #686B60"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#686B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 5v14M5 12h14"/></svg><span style="font-size: 13.5px; font-weight: 600">Empty slot — add a photograph</span></span></sc-if></div>
+<span style="font-size: 13.5px; line-height: 1.55; color: {{noteColor}}">{{prevNote}}</span>
+<div class="cs-acts" style="display: flex; gap: 8px"><button type="button" class="cs-btn2" style="flex: 1 1 80px; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border-radius: 8px; border: 1px solid #E5E4DA; background: #FFFFFF; color: #55584E; font: 600 13px Manrope, sans-serif; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M7 3v14h14"/><path d="M3 7h14v14"/></svg>Crop</button><button type="button" class="cs-btn2" style="flex: 1 1 80px; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border-radius: 8px; border: 1px solid #E5E4DA; background: #FFFFFF; color: #55584E; font: 600 13px Manrope, sans-serif; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M19 8a7.5 7.5 0 1 0 1 6"/><path d="M19 3v5h-5"/></svg>Replace</button><button type="button" class="cs-btn2" style="flex: 1 1 80px; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border-radius: 8px; border: 1px solid #E5E4DA; background: #FFFFFF; color: #55584E; font: 600 13px Manrope, sans-serif; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>Remove</button></div>
+</div>
+<p style="margin: 0; display: flex; gap: 8px; font-size: 13px; line-height: 1.55; color: #55584E"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#686B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.1"/></svg>Original photographs are kept unchanged as evidence and embedded in the report. Cropped copies are used only for analysis.</p>
+</section>
+<aside style="flex: 1 1 280px; background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">For better results — cover these areas</h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px"><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #55584E"><span style="width: 6px; height: 6px; border-radius: 3px; background: #9CAB84; flex-shrink: 0; margin-top: 8px"></span><span>Front of pack — product name and brand</span></li><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #55584E"><span style="width: 6px; height: 6px; border-radius: 3px; background: #9CAB84; flex-shrink: 0; margin-top: 8px"></span><span>Back — ingredients and nutrition</span></li><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #55584E"><span style="width: 6px; height: 6px; border-radius: 3px; background: #9CAB84; flex-shrink: 0; margin-top: 8px"></span><span>Manufacturer address and licence number</span></li><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #55584E"><span style="width: 6px; height: 6px; border-radius: 3px; background: #9CAB84; flex-shrink: 0; margin-top: 8px"></span><span>Batch, manufacturing and expiry dates</span></li><li style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #55584E"><span style="width: 6px; height: 6px; border-radius: 3px; background: #9CAB84; flex-shrink: 0; margin-top: 8px"></span><span>MRP, net quantity and customer-care details</span></li></ul>
+<div style="height: 1px; background: #E5E4DA"></div>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #55584E">Hold the camera parallel to the label, avoid glare, and fill the frame with the text you need.</p>
+</aside>
+</div>
+<div class="cs-bar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px">
+<a class="cs-btn2" href="#" style="display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; min-height: 44px; border-radius: 10px; background: #FFFFFF; color: #20231D; border: 1px solid #E5E4DA; font-size: 15px; font-weight: 600; text-decoration: none; ">Save draft</a>
+<div class="cs-bar" style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px"><span style="font-size: 13.5px; color: #55584E">1 image has a quality warning</span><a class="cs-btn" href="VerifyFields.dc.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; min-height: 44px; border-radius: 10px; background: #56703A; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none; ">Extract Label Information<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</div>
+
+</main>
+</div>
+</div>
+</x-dc>
+<div id="cs-top"></div>
+<div id="cs-load" role="status" aria-live="polite"><div class="ring"></div><div class="lt">Loading</div></div>
+<script>
+(function () {
+  var top = document.getElementById('cs-top'), load = document.getElementById('cs-load');
+  if (top) { top.className = 'go'; setTimeout(function () { top.style.transition = 'opacity .3s'; top.style.opacity = '0'; top.style.width = '100%'; }, 600); }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('a,button,.cs-ib') : null;
+    if (!el) return;
+    if (el.classList.contains('cs-btn') || el.classList.contains('cs-btn2') || el.classList.contains('cs-ib') || el.tagName === 'BUTTON') {
+      var r = el.getBoundingClientRect(), s = document.createElement('span');
+      s.className = 'cs-rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px';
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      el.appendChild(s); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 650);
+    }
+    var h = el.tagName === 'A' ? el.getAttribute('href') : null;
+    if (h && /\.dc\.html/.test(h) && el.target !== '_blank' && !e.metaKey && !e.ctrlKey) {
+      var lt = load.querySelector('.lt'); if (lt) lt.textContent = 'Loading';
+      load.className = 'on';
+      if (top) { top.style.transition = 'none'; top.style.opacity = '1'; top.style.width = '0'; top.className = ''; void top.offsetWidth; top.className = 'go'; }
+      setTimeout(function () { load.className = ""; }, 1200);
+    }
+  }, true);
+})();
+</script>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 1440, "height": 1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const cur = s.cat || 'staples';
+    const defs = [
+      { id: 'bev', label: 'Packaged Beverages & Water' },
+      { id: 'snack', label: 'Packaged Snacks' },
+      { id: 'dairy', label: 'Dairy Products' },
+      { id: 'staples', label: 'Groceries & Food Staples' }
+    ];
+    const names = { bev: 'Packaged Beverages & Water', snack: 'Packaged Snacks', dairy: 'Dairy Products', staples: 'Groceries & Food Staples' };
+    const cats = defs.map((c) => {
+      const on = c.id === cur;
+      return {
+        id: c.id,
+        label: c.label,
+        selected: on,
+        pick: () => this.setState({ cat: c.id }),
+        box: 'flex: 1 1 210px; display: flex; align-items: center; gap: 10px; padding: 14px 16px; min-height: 56px; border-radius: 10px; cursor: pointer; font-size: 14.5px; font-weight: ' + (on ? '700' : '500') + '; border: 1.5px solid ' + (on ? '#56703A' : '#E5E4DA') + '; background: ' + (on ? '#EEF2E1' : '#FFFFFF') + '; color: ' + (on ? '#20231D' : '#55584E')
+      };
+    });
+    const ph = s.photo || 1;
+    const P = [
+      { l: 'Photo 1 · Front', st: 'ok', note: 'Clear and readable. No problems found.' },
+      { l: 'Photo 2 · Back', st: 'ok', note: 'Clear and readable. No problems found.' },
+      { l: 'Photo 3 · Side', st: 'err', note: 'Problem: this image looks blurry, so small text may be hard to read. Retake it or continue anyway.' },
+      { l: 'Photo 4 · Empty', st: 'empty', note: 'No photograph added yet. Up to five images can be added.' },
+      { l: 'Photo 5 · Empty', st: 'empty', note: 'No photograph added yet. Up to five images can be added.' }
+    ];
+    const col = { ok: ['#4F7A2E', '#EEF2E1', '#2F5A12', 'All okay'], err: ['#D9822B', '#FFF4E2', '#8A4A06', 'Error'], empty: ['#CBC8B6', '#FBF8F0', '#6B6E60', 'Empty'] };
+    const photos = P.map((p, i) => {
+      const on = ph === i + 1; const c = col[p.st];
+      return { aria: 'View ' + p.l, label: p.l, thumb: String(i + 1), badge: c[3], pick: () => this.setState({ photo: i + 1 }),
+        badgeStyle: 'padding: 2px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; background: ' + c[1] + '; color: ' + c[2],
+        style: 'flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 12px; cursor: pointer; font-family: Manrope, sans-serif; background: #FFFFFF; transition: all .15s ease; border: ' + (on ? '3px' : '2px') + ' ' + (p.st === 'empty' ? 'dashed' : 'solid') + ' ' + c[0] + '; box-shadow: ' + (on ? '0 4px 14px rgba(60,70,40,.18)' : 'none') };
+    });
+    const cur2 = P[ph - 1]; const cc = col[cur2.st];
+    return { cats, chosen: names[cur], photos: photos,
+      prevTitle: cur2.l, prevBadge: cc[3], prevNote: cur2.note, noteColor: cc[2],
+      prevStyle: 'display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; background: ' + cc[1] + '; border: 3px ' + (cur2.st === 'empty' ? 'dashed' : 'solid') + ' ' + cc[0] + '; animation: csFade .3s ease both',
+      prevBadgeStyle: 'padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: #FFFFFF; color: ' + cc[2],
+      show1: ph === 1, show2: ph === 2, show3: ph === 3, showEmpty: ph > 3 };
+  }
+}
+</script>
+</body>
+</html>

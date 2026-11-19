@@ -1,0 +1,71 @@
+/* CRATE-SCAN shared CSS — final. Present in every desktop & mobile screen. Source: base.CSS */
+
+body{margin:0;background:#F6F2E6}
+a{color:#56703A}a:hover{color:#3E5228}
+*{box-sizing:border-box}
+.cs-btn,.cs-btn2,.cs-mi,.cs-row,.cs-ib,.cs-chipbtn{transition:background .15s ease,border-color .15s ease}
+.cs-nav a:hover{background:#FBF8F0}
+.cs-btn:hover{background:#485F30 !important}
+.cs-btn2:hover{background:#FBF8F0 !important;border-color:#CFCDBF !important}
+.cs-mi:hover,.cs-mi:focus-visible{background:#EEF2E1}
+.cs-row:hover{background:#FBF8F0}
+.cs-ib:hover{background:#E3EACF !important;border-color:#9CAB84 !important}
+.cs-chipbtn:hover{background:#E3EACF !important}
+.cs-card:hover{border-color:#9CAB84}
+.cs-card2 span{white-space:normal !important}
+html,body{overflow-x:hidden;max-width:100%}
+table th,table td{white-space:normal !important;overflow-wrap:anywhere}
+img,svg,table{max-width:100%}
+@media (max-width: 760px){
+ .cs-step-f{display:none !important}
+ .cs-step-c{display:block !important}
+ .cs-pbtns{display:grid !important;grid-template-columns:1fr 1fr;gap:10px !important;width:100%}
+ .cs-pbtns>*{justify-content:center;min-height:48px !important;white-space:normal;text-align:center}
+ .cs-acts{flex-wrap:wrap !important}
+ .cs-acts>*{flex:1 1 90px !important;min-height:46px !important;font-size:13.5px !important;white-space:nowrap}
+ .cs-bar{flex-direction:column !important;align-items:stretch !important}
+ .cs-bar>*,.cs-bar a{width:100%;justify-content:center}
+ .cs-card2{min-width:0 !important;overflow:hidden}
+ .cs-card2 span{overflow-wrap:anywhere}
+}
+@keyframes csIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes csFade{from{opacity:0}to{opacity:1}}
+@keyframes csSpin{to{transform:rotate(360deg)}}
+@keyframes csRipple{from{transform:scale(0);opacity:.45}to{transform:scale(4);opacity:0}}
+@keyframes csPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.18);opacity:.45}}
+@keyframes csScan{0%{top:4%}50%{top:92%}100%{top:4%}}
+@keyframes csOrbit{to{transform:rotate(360deg)}}
+@keyframes csShimmer{from{background-position:-200px 0}to{background-position:200px 0}}
+@keyframes csDots{0%,20%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+@keyframes csPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes csBar{0%{width:0}60%{width:75%}100%{width:92%}}
+@keyframes csWrite{from{width:0}to{width:100%}}
+main{animation:csIn .45s ease both}
+main>*{animation:csIn .5s ease both}
+main>*:nth-child(2){animation-delay:.05s}main>*:nth-child(3){animation-delay:.1s}main>*:nth-child(4){animation-delay:.15s}
+main>*:nth-child(5){animation-delay:.2s}main>*:nth-child(6){animation-delay:.25s}
+.cs-btn,.cs-btn2{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease,box-shadow .15s ease}
+.cs-btn:hover{box-shadow:0 4px 12px rgba(60,80,40,.25)}
+.cs-btn:active,.cs-btn2:active,.cs-ib:active,.cs-chipbtn:active{transform:scale(.96)}
+.cs-rip{position:absolute;border-radius:50%;width:40px;height:40px;margin:-20px 0 0 -20px;background:rgba(255,255,255,.55);pointer-events:none;animation:csRipple .6s ease-out forwards}
+.cs-btn2 .cs-rip,.cs-ib .cs-rip{background:rgba(86,112,58,.28)}
+.cs-ib{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease}
+.cs-working{pointer-events:none;opacity:.85}
+.cs-working::after{content:"";display:inline-block;width:14px;height:14px;margin-left:8px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:csSpin .7s linear infinite}
+.cs-row,.cs-card{transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.cs-card:hover{transform:translateY(-2px)}
+#cs-load{position:fixed;inset:0;z-index:9999;background:rgba(246,242,230,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:csFade .2s ease both}
+#cs-load.on{display:flex}
+#cs-load .ring{width:54px;height:54px;border-radius:50%;border:4px solid #DCE3C6;border-top-color:#56703A;animation:csSpin .8s linear infinite}
+#cs-load .lt{font:600 14px Manrope,sans-serif;color:#55584E}
+#cs-top{position:fixed;top:0;left:0;height:3px;width:0;background:#56703A;z-index:10000;opacity:0}
+#cs-top.go{opacity:1;animation:csBar 1.4s ease-out forwards}
+.cs-dots span{animation:csDots 1.2s infinite}.cs-dots span:nth-child(2){animation-delay:.2s}.cs-dots span:nth-child(3){animation-delay:.4s}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important}}
+@media (max-width: 760px){
+ .cs-side{flex-basis:100% !important;border-right:none !important;border-bottom:1px solid #E5E4DA}
+ .cs-side .cs-nav{flex-direction:row !important;overflow-x:auto}
+ .cs-side .cs-nav a{white-space:nowrap}
+ .cs-side .cs-foot{display:none !important}
+ .cs-hide-sm{display:none !important}
+}

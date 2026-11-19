@@ -1,0 +1,48 @@
+# CRATE-SCAN — Decisions
+
+Each entry: decision · reason · source. Changing a gate selection needs the owner's explicit instruction; update this file,
+the deploy configuration, CI workflows and `DEPLOYMENT.md` together.
+
+## Deployment Selection Gate (recorded 2026-11-19)
+
+| # | Question | Selection | Reason |
+|---|----------|-----------|--------|
+| 1 | Backend host | **A1 Render** (free web service) | Default. AI calls and PDF generation run too long for serverless functions (A4). |
+| 2 | Frontend host | **B1 Netlify** | Default. Netlify's Next.js runtime; no static-export restriction. |
+| 3 | Database | **C1 MongoDB Atlas Free (512 MB)** | Default; prototype / portfolio scale. |
+| 4 | Sign-in | **E2 Google sign-in only** | Owner instruction and design (single Google button). |
+| 5 | File uploads | **D3 MongoDB GridFS** (owner-approved addition to the master prompt's D1/D2) | Owner instruction: "we are only using MongoDB". Product cannot work without photos, reference images and PDFs. |
+| 6 | Expected active users | up to 60 | Default. |
+| 7 | GitHub repository | Owner will connect a repository; `DubbakaSathwik/Food_inspection_toolkit` (attached 2026-11-19); work on `feature/initial-build`. | Owner instruction. |
+| 8 | Deployment mode | **F1** automatic deploy from `main` after all CI checks pass | Default. |
+
+## Conflict resolutions (owner answers, 2026-11-19)
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| D-01 | Next.js (App Router) replaces React + Vite from the design handoff. | Master prompt mandatory stack; owner confirmed. |
+| D-02 | Tailwind CSS v4 with the design tokens defined once as CSS variables (`@theme`). | Master prompt requires Tailwind; owner wanted CSS-variable tokens — both satisfied. |
+| D-03 | Files live in MongoDB **GridFS** buckets. Only metadata lives in normal documents. | Owner: MongoDB only. Master prompt rule "never store large files inside documents" is respected: GridFS splits files into 255 KB chunk documents. |
+| D-04 | **Image handling:** AI extraction (Gemini → backup) and the OCR fallback always receive the **full-quality original**; resized only when a provider's documented request limit requires it. Crops are cut from the original at analysis time (crop rectangle stored, original untouched). Originals stay temporarily in GridFS until the report is generated, then are deleted. Abandoned inspections' originals are deleted after `PHOTO_RETENTION_DAYS` (default 7). Only the copies embedded in the PDF are compressed. | Owner instruction. |
+| D-05 | Extraction order: primary AI (Gemini) → backup AI (NVIDIA or Hugging Face, configurable) → OCR fallback (PaddleOCR, if enabled) → save as **incomplete** with retry. | Owner instruction + MVP §5 failure workflow. |
+| D-06 | PaddleOCR is an optional extra (`uv sync --extra ocr`), **disabled on Render** (needs ~1 GB RAM; free instance has 512 MB). Enabled locally with `OCR_ENABLED=true`. | Owner confirmed. |
+| D-07 | Google sign-in only. New accounts are **pending** until an admin approves them and chooses the role. | Owner + design (Pending screen, UserManagement approvals). |
+| D-08 | First Super Admin: the email in backend env `SUPER_ADMIN_EMAIL` becomes `super_admin` + active on first sign-in. `scripts/grant_role.py` is the backup bootstrap script. | Owner chose env var; master prompt asks for a script — both provided. |
+| D-09 | Compliance rules are seeded as clearly labelled **demo rules** that admins edit. Verified / Not verified / Suspicious is a **provisional suggestion** computed by a simple, documented heuristic; the inspector always chooses. | Classification criteria are not finalised (PRD open decision 1). Master prompt forbids inventing regulatory rules. |
+| D-10 | AI keys are supplied by the owner later via `.env`. Until then a deterministic `fake` provider (refused when `APP_ENV=production`) drives tests and local demos; real-provider calls are reported as **not verified**. | Owner: "make a .env example; I will add my keys and test". |
+
+## Technical decisions
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| T-01 | MongoDB driver: **PyMongo native async API** (`AsyncMongoClient`, `gridfs.AsyncGridFSBucket`, PyMongo 4.20). Motor is deprecated in favour of it (MongoDB docs). | Master prompt §4 asks to verify and record. |
+| T-02 | Python 3.12, managed with **uv** (`uv.lock`). Frontend uses **pnpm** (`pnpm-lock.yaml`). | Reproducible installs. |
+| T-03 | Roles = Firebase custom claims `{role, active}` set only by server code. Every request **also** checks the user document's status so deactivation applies immediately; sensitive admin actions check token revocation. | Master prompt §1.3 + immediate disable requirement. |
+| T-04 | Gemini model configured by `GEMINI_MODEL` (default alias `gemini-flash-latest`). Model names change often; the alias avoids hard-coding a retiring version. | Current model list was inconsistent at build time. |
+| T-05 | AI providers are called through their REST APIs with `httpx` (no vendor SDKs). | Fewer dependencies; easy to fake in tests. |
+| T-06 | PDF reports use ReportLab's built-in Helvetica; Manrope is used on screen (`@fontsource-variable/manrope`). | ReportLab needs TTF files; Manrope TTFs are not bundled. |
+| T-07 | Desktop vs mobile: one component per screen, layout switches at **≤ 760 px** (design breakpoint). Tablets use the desktop layout. | Owner confirmed (answer 7). |
+| T-08 | Inspection IDs `CS-YYYY-NNNN` from an atomic counter document. | Matches design. |
+| T-09 | Per-inspector daily AI quota (`AI_DAILY_LIMIT_PER_USER`, default 60 calls) tracked in `usage_metrics`, plus HTTP rate limits (slowapi). | MVP: controlled API limits; no silent paid usage. |
+| T-10 | No keep-alive pings to Render; the frontend wakes the backend via `/health` and shows a "Starting server" state. | Master prompt §12 rule on keep-alive pings. |
+| T-11 | Playwright pinned to 1.63.0 locally to match the pre-installed browser; CI installs browsers for the same version. | Environment constraint. |
