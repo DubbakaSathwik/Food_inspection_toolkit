@@ -1,6 +1,6 @@
 # CRATE-SCAN — Project Specification
 
-Sources: MVP document V1 (primary scope), PRD v1.0, Project Details, Ideation document, final design handoff ZIP
+Sources (originals in `docs/source-documents/`): MVP document V1 (primary scope), PRD v1.0, Project Details, Ideation document, final design handoff ZIP
 (44 screens), owner answers (see `DECISIONS.md`). All people, products, licence numbers and records used as seed or
 sample data are **fictional** and labelled as such.
 
