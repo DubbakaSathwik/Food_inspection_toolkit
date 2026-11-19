@@ -160,6 +160,15 @@ Analytics/Audit filters clicked through the UI (rendered with live data; audit e
 ### GitHub Actions
 - Run 1 (`44542170646`, commit 13a26d9): Quality ✓, CodeQL Python ✓, CodeQL JS/TS ✓; Security ✗ (only the DAL-rule step: it loaded
   the DB fixture without a database — now runs with `--noconftest`; gitleaks/pip-audit/Bandit passed); Tests ✗ (defect 3 above).
+- Run 2 (`44542863042`, commit d123a6e): **success** — Quality ✓, Security ✓ (gitleaks, pip-audit, Bandit, DAL rule, pnpm audit),
+  CodeQL Python ✓, CodeQL JS/TS ✓, Tests ✓ (pytest 64 passed / 89.45 %, Vitest 9 passed, Playwright 40 passed + 2 skipped on
+  desktop and mobile), Build ✓ (bundle scan clean, production start `/health` ok). Deploy and smoke: skipped as designed (they run
+  only on pushes to `main`; no deployment secrets exist yet).
+
+### Not verified in Phase 4
+Deploy and smoke jobs (need `main` + owner's Render/Netlify secrets) · real Google sign-in · real AI providers · Atlas ·
+Render's handling of `render.yaml` (render.com docs were not reachable from the build environment; values follow standard Render
+Python settings and are documented as manual fallback in `docs/DEPLOYMENT.md` §3).
 
 ### New tests
 `tests/test_ratelimit.py` (limit parsing, buckets, 429 format), `test_health.py` (HEAD, NoSQL operator objects rejected /
