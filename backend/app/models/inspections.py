@@ -219,6 +219,7 @@ class InspectionOut(OutModel):
     fields: list[FieldOut] = []
     analysis: dict[str, Any] | None = None
     findings: list[FindingOut] = []
+    analysis_stale: bool = False
     suggestion: Suggestion | None = None
     decision: InspectionDecisionOut | None = None
     report: ReportOut | None = None

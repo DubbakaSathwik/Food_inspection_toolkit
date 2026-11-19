@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any
 
 import firebase_admin
@@ -28,6 +29,11 @@ def init_firebase() -> None:
     if firebase_admin._apps:
         return
     s = get_settings()
+    if s.firebase_auth_emulator_host:
+        if s.is_production:
+            raise RuntimeError("FIREBASE_AUTH_EMULATOR_HOST must not be set in production")
+        # The Admin SDK reads the emulator host from the process environment (not from .env).
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = s.firebase_auth_emulator_host
     cred: credentials.Base | None = None
     if s.firebase_service_account_json:
         cred = credentials.Certificate(json.loads(s.firebase_service_account_json))

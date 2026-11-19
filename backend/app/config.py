@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # Firebase
     firebase_project_id: str = "demo-cratescan"
     firebase_service_account_json: str | None = None  # full JSON contents (server-only secret)
+    firebase_auth_emulator_host: str | None = None  # local development / tests only
     super_admin_email: str | None = None
 
     # HTTP

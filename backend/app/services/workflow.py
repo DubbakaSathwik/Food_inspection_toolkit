@@ -53,6 +53,7 @@ def to_out(doc: dict[str, Any], notes: list[dict[str, Any]] | None = None) -> di
         "fields": out_fields,
         "analysis": doc.get("analysis"),
         "findings": doc.get("findings", []),
+        "analysis_stale": bool(doc.get("analysis_stale")),
         "suggestion": doc.get("suggestion"),
         "decision": doc.get("decision"),
         "report": doc.get("report"),

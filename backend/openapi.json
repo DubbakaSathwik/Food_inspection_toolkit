@@ -1291,6 +1291,11 @@
       ],
       "title": "Analysis"
      },
+     "analysis_stale": {
+      "default": false,
+      "title": "Analysis Stale",
+      "type": "boolean"
+     },
      "category": {
       "anyOf": [
        {
