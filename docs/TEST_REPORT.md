@@ -127,3 +127,40 @@ illustrative content is labelled ("Sample preview" on the landing page, pack ill
 ### Not verified in Phase 3
 Real Google sign-in popup/redirect and real Firebase project · real AI providers (no keys) · PaddleOCR · rate limits (disabled in tests) ·
 Analytics/Audit filters clicked through the UI (rendered with live data; audit export covered by backend tests) · deployment (Phase 4).
+
+## Phase 4 — CI/CD, security review, final checks (2026-11-19)
+
+### Local runs (same commands as CI)
+| Check | Result |
+|-------|--------|
+| ruff check / ruff format --check / mypy strict (backend) | clean (55 source files) |
+| OpenAPI export + generated frontend types | no drift |
+| ESLint / Prettier / tsc (frontend) | clean |
+| pytest with coverage gate `--cov-fail-under=85` | **64 passed**, coverage **89.45 %** |
+| Vitest (now vitest 5) | 9 passed |
+| Playwright full suite, desktop 1440 + mobile iPhone 14 (fresh stack) | **40 passed, 2 skipped** (skips are by design, unchanged from Phase 3) |
+| j7 analytics/audit journeys (new) | passed on desktop and mobile (F16, F17 now ☑) |
+| Production-mode start (`APP_ENV=production`, Render start command) | `/health` 200 ok, `/docs` 404, `/api/v1/me` 401, HSTS present; emulator host refused in production |
+| actionlint 1.7.12 on all workflows | clean |
+| gitleaks 8.30.1 (full history) | no leaks |
+| pip-audit 2.10.0 | no known vulnerabilities |
+| pnpm audit (high) | was 1 high + 2 critical → fixed (vitest 5, @grpc/grpc-js override) → none |
+| Bandit | clean |
+| Bundle secret scan (`scripts/scan-bundle.sh`) | clean |
+
+### Defects found in Phase 4
+1. **Rate limiting was not enforced** (slowapi middleware never matched our routes). Replaced by `app/ratelimit.py`; verified
+   live (`200 200 200 200 429 429 429`, `Retry-After`, CORS on 429) and by `tests/test_ratelimit.py` (T-38).
+2. Vulnerable dev/transitive JavaScript dependencies (see table) — upgraded/overridden.
+3. **Unstable ordering** (found by the first GitHub Actions run): two chat messages written in the same millisecond could come back
+   in the wrong order, and any paged list with equal timestamps could repeat/skip items between pages. `paginate()` now always adds
+   an `_id` tiebreaker; `test_assistant.py` re-run repeatedly.
+4. `HEAD /health` returned 405 (uptime monitors use HEAD) — now 200, hidden from the schema; tested.
+
+### GitHub Actions
+- Run 1 (`44542170646`, commit 13a26d9): Quality ✓, CodeQL Python ✓, CodeQL JS/TS ✓; Security ✗ (only the DAL-rule step: it loaded
+  the DB fixture without a database — now runs with `--noconftest`; gitleaks/pip-audit/Bandit passed); Tests ✗ (defect 3 above).
+
+### New tests
+`tests/test_ratelimit.py` (limit parsing, buckets, 429 format), `test_health.py` (HEAD, NoSQL operator objects rejected /
+treated as literal text), e2e `j7-analytics-audit.spec.ts`.

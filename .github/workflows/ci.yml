@@ -183,7 +183,11 @@ jobs:
           uv run bandit -q -c pyproject.toml -r app scripts
       - name: Data-access-layer rule (routers never touch MongoDB)
         working-directory: backend
-        run: uv run pytest -q -p no:cacheprovider tests/test_architecture.py --no-cov
+        env:
+          APP_ENV: test
+          FIREBASE_PROJECT_ID: demo-cratescan
+        # Static checks only: skip conftest (its session fixture needs MongoDB, which this job does not run).
+        run: uv run pytest -q -p no:cacheprovider --noconftest tests/test_architecture.py --no-cov
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           package_json_file: frontend/package.json

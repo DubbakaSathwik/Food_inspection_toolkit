@@ -30,6 +30,9 @@ async def paginate(
 ) -> tuple[list[dict[str, Any]], int]:
     c = col(collection)
     total = await c.count_documents(flt)
+    # Tiebreaker: equal timestamps must not reorder or repeat items across pages.
+    if all(k != "_id" for k, _ in sort):
+        sort = [*sort, ("_id", sort[-1][1] if sort else -1)]
     cur = c.find(flt, projection).sort(sort).skip((page - 1) * page_size).limit(page_size)
     return [d async for d in cur], total
 

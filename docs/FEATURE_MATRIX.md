@@ -22,8 +22,8 @@ All `/api/v1` paths. Every user-owned query filters by `owner_uid` in the reposi
 | F13 Reference DB | 051–055 | A/S | ReferenceDatabase, ProductDetail | `GET/POST /admin/reference`, `GET/PATCH/DELETE /admin/reference/{id}`, `POST …/archive`, `POST …/restore`, `POST/DELETE …/images`, `POST /admin/reference/ai-extract`, `POST /admin/reference/import/preview`, `POST /admin/reference/import/commit` | reference_records, `refimages`, audit_logs | admin; delete = super admin | test_reference.py | ☑ |
 | F14 Compliance rules | 056 | A | ComplianceRules | `GET/POST /admin/rules`, `PATCH /admin/rules/{id}`, `POST …/archive` | compliance_rules, audit_logs | admin | test_rules.py | ☑ |
 | F15 Users | 057 | A/S | UserManagement | `GET/POST /admin/users`, `GET /admin/users/{uid}`, `POST …/approve`, `POST …/decline`, `PATCH /admin/users/{uid}` | users, user_invites, audit_logs | admin; admin/super roles only by S | test_users.py | ☑ |
-| F16 Analytics | 058 | A | Analytics | `GET /admin/analytics` | all (aggregates), GridFS stats | admin | test_admin.py | ◐ backend+UI |
-| F17 Audit | 059 | A | AuditLogs | `GET /admin/audit`, `GET /admin/audit/export` | audit_logs | admin; read-only | test_admin.py | ◐ backend+UI |
+| F16 Analytics | 058 | A | Analytics | `GET /admin/analytics` | all (aggregates), GridFS stats | admin | test_admin.py, e2e j7 | ☑ |
+| F17 Audit | 059 | A | AuditLogs | `GET /admin/audit`, `GET /admin/audit/export` | audit_logs | admin; read-only | test_admin.py, e2e j7 | ☑ |
 | F18 Settings & site images | 060 | A / P | Settings, Main, SignIn, Dashboard | `GET/PATCH /admin/settings`, `PUT/DELETE /admin/settings/images/{key}`, `GET /public/site-images[/{key}]`, `GET/POST /admin/storage[/cleanup]` | settings, `siteimages` | admin; image GET public | test_settings.py | ☑ |
 | F19 Ask AI | 070–071 | I | AskAI | `GET/POST/DELETE /assistant/messages` | chat_messages, usage_metrics | owner; quota | test_assistant.py | ☑ |
 | F20 Health / cold start | NFR-05 | P | all | `GET /health` | — | public | test_health.py | ☑ |
@@ -44,8 +44,8 @@ Screens: `frontend/src/app/**/page.tsx` (22 routes). Vitest: `src/__tests__/` (8
 | `j4-admin` | F13 manual entry with server validation, packaging version + photo, archive/restore, history; AI-assisted draft; CSV import preview/commit; F14 rule create/edit/history; F18 site image upload shown on landing + reset |
 | `j5-assistant-coldstart` | F19 Ask AI with/without web research, history persisted; F20 "Starting the server" banner and recovery |
 | `j6-security` | direct API calls: no/forged token, other owner (404), inspector on admin APIs (403), role escalation (422), pending account (403), audit log read-only (405); no secrets/private data in `.next/static` |
+| `j7-analytics-audit` | F16 period filter + chart/table toggle; F17 action filter, search, change details, CSV export (Phase 4) |
 | `screens` | every route renders at 1440/390 without overflow or console errors (F12, F16, F17 included) |
 
-◐ notes: **F16 Analytics** and **F17 Audit** are rendered with live data and their data is produced by the journeys, but filters/export on those
-screens were not clicked through (audit CSV export is covered by backend tests). Profile editing (F01) and Super-Admin permanent delete (F13)
+Notes: Profile editing (F01) and Super-Admin permanent delete (F13)
 are covered by backend tests only.
