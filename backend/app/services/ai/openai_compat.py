@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 
 from app.config import get_settings
-from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json
+from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json, post_with_retry
 from app.services.images import ImageInput, fit_to_limit
 
 
@@ -45,7 +45,8 @@ class OpenAICompatProvider:
     async def _complete(self, messages: list[dict[str, Any]], max_tokens: int = 3000) -> str:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                r = await client.post(
+                r = await post_with_retry(
+                    client,
                     f"{self.base_url}/chat/completions",
                     headers={
                         "authorization": f"Bearer {self.api_key}",

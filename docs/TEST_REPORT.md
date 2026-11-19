@@ -187,3 +187,8 @@ Requested by the owner after local testing with real keys failed with opaque err
 - Provider errors now include the provider's own reason (e.g. `HTTP 403 — API key not valid`) via `http_error()`.
 - Tests: `test_diagnostics_admin_only_and_secret_free` (65 backend tests, 88.6 %), e2e `diagnostics` journey (desktop + mobile;
   j7 + screens 16/16 passed). Real-provider results themselves are not verifiable from the build environment.
+
+### AI provider overload handling (2026-11-19)
+Real-key testing showed Gemini returning `HTTP 503 — high demand`. Providers now retry temporary 5xx answers twice
+(after 2 s, then 5 s) before the chain moves to the next provider (`post_with_retry`). Tests: 503 → retry → success, and a persistent 503
+reports the provider's own reason. 67 backend tests passed (88.6 %). Not verified against the live Gemini service.

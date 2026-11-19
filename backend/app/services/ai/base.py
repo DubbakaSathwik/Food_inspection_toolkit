@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from dataclasses import dataclass, field
@@ -77,3 +78,18 @@ def http_error(r: Any) -> ProviderError:
         reason = body
     reason = re.sub(r"\s+", " ", reason).strip()
     return ProviderError(f"HTTP {r.status_code}" + (f" — {reason[:110]}" if reason else ""))
+
+
+TRANSIENT_STATUS = {500, 502, 503, 504}
+RETRY_DELAYS: tuple[float, ...] = (2.0, 5.0)  # seconds between attempts; overridden in tests
+
+
+async def post_with_retry(client: Any, url: str, **kwargs: Any) -> Any:
+    """POST, retrying a few times when the provider reports a temporary overload (5xx)."""
+    r = await client.post(url, **kwargs)
+    for delay in RETRY_DELAYS:
+        if r.status_code not in TRANSIENT_STATUS:
+            break
+        await asyncio.sleep(delay)
+        r = await client.post(url, **kwargs)
+    return r

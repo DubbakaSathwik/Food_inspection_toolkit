@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 
 from app.config import get_settings
-from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json
+from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json, post_with_retry
 from app.services.images import ImageInput, fit_to_limit
 
 
@@ -48,7 +48,7 @@ class GeminiProvider:
         }
         try:
             async with httpx.AsyncClient(timeout=self.s.ai_timeout_seconds) as client:
-                r = await client.post(url, json=body, headers=headers)
+                r = await post_with_retry(client, url, json=body, headers=headers)
         except httpx.HTTPError as e:
             raise ProviderError(f"network error ({type(e).__name__})") from e
         if r.status_code != 200:
