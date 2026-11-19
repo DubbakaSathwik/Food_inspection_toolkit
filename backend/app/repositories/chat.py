@@ -46,7 +46,12 @@ async def history(p: Principal, page: int, page_size: int) -> tuple[list[dict[st
 
 
 async def recent(p: Principal, limit: int = 10) -> list[dict[str, Any]]:
-    cur = col("chat_messages").find({"owner_uid": p.uid}).sort("created_at", -1).limit(limit)
+    cur = (
+        col("chat_messages")
+        .find({"owner_uid": p.uid})
+        .sort([("created_at", -1), ("_id", -1)])
+        .limit(limit)
+    )
     return list(reversed([d async for d in cur]))
 
 

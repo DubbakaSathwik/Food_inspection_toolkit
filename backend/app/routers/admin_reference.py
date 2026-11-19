@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from app.auth import require_admin
 from app.config import get_settings
 from app.errors import AppError
-from app.http import AI_LIMIT, WRITE_LIMIT, limiter, read_upload
+from app.http import read_upload
 from app.models.common import Category, OkOut, Page
 from app.models.reference import (
     AiDraftOut,
@@ -61,7 +61,6 @@ async def stats(p: Admin) -> dict[str, int]:
 
 
 @router.post("", response_model=ReferenceOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def create(request: Request, p: Admin, body: ReferenceIn) -> dict[str, Any]:
     return to_out(await reference.create(p, body.model_dump(mode="json")))
 
@@ -108,7 +107,6 @@ async def add_version(
 
 
 @router.post("/{ref_id}/versions/{version_id}/images", response_model=ReferenceOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def add_image(
     request: Request,
     p: Admin,
@@ -146,7 +144,6 @@ async def remove_image(p: Admin, ref_id: str, file_id: str) -> dict[str, Any]:
 
 
 @router.post("/ai-extract", response_model=AiDraftOut)
-@limiter.limit(AI_LIMIT)
 async def ai_extract(
     request: Request, p: Admin, files_in: Annotated[list[UploadFile], File(alias="files")]
 ) -> dict[str, Any]:
@@ -212,7 +209,6 @@ async def import_preview(p: Admin, file: Annotated[UploadFile, File()]) -> dict[
 
 
 @router.post("/import/commit")
-@limiter.limit(WRITE_LIMIT)
 async def import_commit(request: Request, p: Admin, body: ImportCommitIn) -> dict[str, Any]:
     ids = await reference.create_many(p, [r.model_dump(mode="json") for r in body.rows])
     return {"created": len(ids), "ids": ids}

@@ -166,3 +166,13 @@ def test_helpers() -> None:
     assert same == big and resized is False
     small, mime, resized = fit_to_limit(big, "image/png", 60_000)
     assert resized and mime == "image/jpeg" and len(small) <= 60_000
+
+
+async def test_fake_provider_fail_marker() -> None:
+    from app.services.ai.fake import FAIL_MARKER, FakeProvider
+
+    with pytest.raises(ProviderError):
+        await FakeProvider().extract(
+            [ImageInput(png_bytes() + FAIL_MARKER, "image/png", "front", 1)], "p"
+        )
+    assert (await FakeProvider().extract([IMG], "p"))["fields"]

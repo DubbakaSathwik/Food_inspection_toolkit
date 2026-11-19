@@ -10,7 +10,6 @@ dependencies = [
   "pydantic-settings>=2.6",
   "pymongo>=4.11",
   "firebase-admin>=6.6",
-  "slowapi>=0.1.9",
   "httpx>=0.28",
   "pillow>=11.0",
   "numpy>=2.1",

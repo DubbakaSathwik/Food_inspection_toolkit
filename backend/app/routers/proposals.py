@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from app.auth import require_inspector
 from app.errors import AppError
-from app.http import WRITE_LIMIT, limiter
 from app.models.common import Page
 from app.models.proposals import ProposalIn, ProposalOut, ProposalReplyIn
 from app.principal import Principal
@@ -27,7 +26,6 @@ def to_out(d: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/proposals", response_model=ProposalOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def create(request: Request, p: Insp, body: ProposalIn) -> dict[str, Any]:
     insp = await insp_repo.get(p, body.inspection_id)  # ownership check (404 otherwise)
     if insp["status"] != "completed" or not insp.get("report"):

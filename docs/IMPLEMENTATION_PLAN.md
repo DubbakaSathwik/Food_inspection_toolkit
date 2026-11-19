@@ -20,10 +20,10 @@ Status: ☐ not started · ◐ in progress · ☑ done (verified) · ⚠ blocked
 | T13 | 2 | public/auth | T12 | Landing, SignIn, Pending | Playwright | ☑ |
 | T14 | 2 | inspector | T12 | Dashboard, New, Verify, AI Review, Findings, Report, History, Proposals, Ask AI, Profile | Playwright | ☑ |
 | T15 | 2 | admin | T12 | Admin dashboard, Reference DB, Product detail, Rules, Proposals, Users, Analytics, Audit, Settings | Playwright | ☑ |
-| T16 | 3 | all | T11,T15 | Integration, cold-start, auth flow with emulator, e2e journeys | Playwright e2e desktop + mobile | ☐ |
-| T17 | 4 | — | T16 | CI workflows, Dependabot, scheduled security, actionlint | actionlint + local runs | ☐ |
-| T18 | 4 | — | T17 | Security review, bundle check, visual comparison vs screenshots | reports | ☐ |
-| T19 | 4 | — | T18 | Docs: README, DATABASE, SECURITY, TEST_REPORT, DEPLOYMENT, HANDOFF | review | ☐ |
+| T16 | 3 | all | T11,T15 | Integration, cold-start, auth flow with emulator, e2e journeys | Playwright e2e desktop + mobile | ☑ |
+| T17 | 4 | — | T16 | CI workflows, Dependabot, scheduled security, actionlint | actionlint + local runs | ☑ |
+| T18 | 4 | — | T17 | Security review, bundle check, visual comparison vs screenshots | reports | ☑ |
+| T19 | 4 | — | T18 | Docs: README, DATABASE, SECURITY, TEST_REPORT, DEPLOYMENT, HANDOFF | review | ☑ |
 
 ## Phase exit gates
 - **Phase 1:** migrations idempotent on disposable DB; auth + isolation + role-escalation tests pass; all routers via repositories (architecture test); pytest green.

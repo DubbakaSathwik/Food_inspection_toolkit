@@ -52,7 +52,8 @@ async def database() -> AsyncIterator[None]:
     await get_client().drop_database("crate_scan_test")
     await run_migrations(get_db())
     init_firebase()
-    httpx.delete(f"http://{EMU}/emulator/v1/projects/demo-cratescan/accounts")
+    # Emulator accounts are NOT wiped: a shared local emulator also serves the dev stack / e2e tests.
+    # Test users have unique emails and the test database is dropped, so stale accounts are harmless.
     yield
     await get_client().drop_database("crate_scan_test")
 

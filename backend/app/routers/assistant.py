@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from app.auth import require_inspector
 from app.errors import AppError
-from app.http import AI_LIMIT, limiter
 from app.models.assistant import ChatIn, ChatMessageOut, ChatReplyOut
 from app.models.common import OkOut, Page
 from app.principal import Principal
@@ -61,7 +60,6 @@ async def history(
 
 
 @router.post("/messages", response_model=ChatReplyOut)
-@limiter.limit(AI_LIMIT)
 async def ask(request: Request, p: Insp, body: ChatIn) -> dict[str, Any]:
     cfg = await settings_repo.load()
     if body.web and not cfg["ai"].get("web_research_enabled", True):
