@@ -176,3 +176,35 @@ async def test_fake_provider_fail_marker() -> None:
             [ImageInput(png_bytes() + FAIL_MARKER, "image/png", "front", 1)], "p"
         )
     assert (await FakeProvider().extract([IMG], "p"))["fields"]
+
+
+async def test_transient_503_is_retried_then_succeeds(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.services.ai import base
+    from app.services.ai import gemini as mod
+
+    monkeypatch.setattr(base, "RETRY_DELAYS", (0.0, 0.0))
+    monkeypatch.setattr(get_settings(), "gemini_api_key", "k")
+    calls = {"n": 0}
+
+    def handler(r: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] < 3:
+            return httpx.Response(503, json={"error": {"message": "high demand"}})
+        return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": "OK"}]}}]})
+
+    _patch_client(monkeypatch, mod, handler)
+    res = await GeminiProvider().chat("s", [{"role": "user", "text": "q"}], web=False)
+    assert res.text == "OK" and calls["n"] == 3
+
+
+async def test_persistent_503_reports_provider_reason(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.services.ai import base
+    from app.services.ai import gemini as mod
+
+    monkeypatch.setattr(base, "RETRY_DELAYS", (0.0,))
+    monkeypatch.setattr(get_settings(), "gemini_api_key", "k")
+    _patch_client(
+        monkeypatch, mod, lambda r: httpx.Response(503, json={"error": {"message": "high demand"}})
+    )
+    with pytest.raises(ProviderError, match="HTTP 503 — high demand"):
+        await GeminiProvider().extract([IMG], "p")
