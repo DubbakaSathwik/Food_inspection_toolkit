@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import re
 from typing import Any
 
 import httpx
@@ -10,6 +11,9 @@ import httpx
 from app.config import get_settings
 from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json, post_with_retry
 from app.services.images import ImageInput, fit_to_limit
+
+_THINK = re.compile(r"<think>.*?(</think>|$)", re.S | re.I)
+_REASONING_TOKENS = 8192  # reasoning models spend tokens thinking before the answer
 
 
 class OpenAICompatProvider:
@@ -43,6 +47,8 @@ class OpenAICompatProvider:
         }
 
     async def _complete(self, messages: list[dict[str, Any]], max_tokens: int = 3000) -> str:
+        if "reason" in self.model.lower() or "think" in self.model.lower():
+            max_tokens = max(max_tokens, _REASONING_TOKENS)
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 r = await post_with_retry(
@@ -64,9 +70,18 @@ class OpenAICompatProvider:
         if r.status_code != 200:
             raise http_error(r)
         try:
-            return str(r.json()["choices"][0]["message"]["content"] or "")
-        except (KeyError, IndexError, ValueError) as e:
+            choice = r.json()["choices"][0]
+            text = _THINK.sub("", str(choice["message"].get("content") or "")).strip()
+            finish = choice.get("finish_reason")
+        except (KeyError, IndexError, ValueError, AttributeError) as e:
             raise ProviderError("unexpected response shape") from e
+        if not text and finish == "length":
+            raise ProviderError(
+                "answer cut off: the model used all its tokens thinking (reasoning model)"
+            )
+        if not text:
+            raise ProviderError("the model returned an empty answer")
+        return text
 
     async def _extract_batch(self, images: list[ImageInput], prompt: str) -> dict[str, Any]:
         content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
