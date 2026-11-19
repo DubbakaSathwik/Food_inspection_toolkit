@@ -1,0 +1,34 @@
+/* Tokens extracted from the final design. The prototype itself uses literal hex values; map to these in React/Tailwind. */
+:root{
+  --cs-page: #F6F2E6;
+  --cs-surface: #FFFFFF;
+  --cs-surface2: #FBF8F0;
+  --cs-border: #E5E4DA;
+  --cs-text: #20231D;
+  --cs-text2: #55584E;
+  --cs-muted: #686B60;
+  --cs-primary: #56703A;
+  --cs-primary-hover: #485F30;
+  --cs-primary-dark: #3E5228;
+  --cs-soft-green: #E3EACF;
+  --cs-tint: #EEF2E1;
+  --cs-tint2: #DCE3C6;
+  --cs-brand-soft-sage: #C5D89D;
+  --cs-brand-muted-olive: #9CAB84;
+  --cs-brand-deep-sage: #89986D;
+  --cs-ok-bg: #E4ECD2;
+  --cs-ok-fg: #3B5420;
+  --cs-warn-bg: #FBEFD9;
+  --cs-warn-fg: #7A4808;
+  --cs-bad-bg: #F3DCD6;
+  --cs-bad-fg: #86301E;
+  --cs-neu-bg: #ECEAE2;
+  --cs-neu-fg: #4D4F46;
+  --cs-info-bg: #E2E8EE;
+  --cs-info-fg: #2F4A63;
+  --cs-input-border: #D8D6C9;
+  --cs-dashed-border: #C9C6B4;
+  --cs-row-divider: #EFEDE4;
+  --cs-font: Manrope, Inter, system-ui, sans-serif;
+  --cs-r-ctl:10px; --cs-r-card:12px; --cs-r-chip:6px;
+}

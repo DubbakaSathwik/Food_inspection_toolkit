@@ -1,0 +1,18 @@
+def packet(name, sub, band, w=150, h=190, side="front"):
+    if side == "front":
+        inner = (f'<div style="height: 24%; background: {band}; border-radius: 10px 10px 0 0"></div>'
+                 f'<div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 3px">'
+                 f'<span style="font-size: 10px; color: #5A5C52; font-weight: 600">{sub}</span>'
+                 f'<span style="font-size: 15px; font-weight: 800; line-height: 1.1; color: #2A2C24">{name}</span></div>'
+                 f'<div style="margin: 4px auto 0; width: 58%; height: 26%; border-radius: 0 0 60px 60px; background: #E8D3A6; border: 3px solid #F6EFE0"></div>')
+    else:
+        lines = "".join(f'<div style="height: 3px; width: {x}%; background: #CFCBBB; border-radius: 2px"></div>' for x in (92,85,96,70,88,60))
+        rows = "".join('<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #DDD9C9; padding: 2px 0"><div style="height: 3px; width: 40%; background: #CFCBBB"></div><div style="height: 3px; width: 18%; background: #CFCBBB"></div></div>' for _ in range(5))
+        inner = (f'<div style="height: 8%; background: {band}; border-radius: 10px 10px 0 0"></div>'
+                 f'<div style="padding: 8px 10px; display: flex; flex-direction: column; gap: 6px">'
+                 f'<span style="font-size: 8px; font-weight: 800; color: #2A2C24">INGREDIENTS</span>{lines}'
+                 f'<span style="font-size: 8px; font-weight: 800; color: #2A2C24; margin-top: 2px">NUTRITION / 100 g</span><div>{rows}</div>'
+                 f'<div style="display: flex; gap: 6px; align-items: center; margin-top: 2px"><div style="border: 1px solid #9C9886; padding: 2px 4px; font-size: 7px; color: #44463D">Lic. No. 1002…</div>'
+                 f'<div style="width: 22px; height: 22px; background: repeating-linear-gradient(90deg,#3A3C34 0 2px,#fff 2px 3px)"></div></div></div>')
+    return f'<div style="width: {w}px; height: {h}px; border-radius: 10px; background: #FBF8EE; box-shadow: 0 6px 18px rgba(60,58,40,0.18); overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0">{inner}</div>'
+

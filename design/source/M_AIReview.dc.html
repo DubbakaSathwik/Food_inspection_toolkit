@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CRATE-SCAN — AI review</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F2E6}
+a{color:#56703A}a:hover{color:#3E5228}
+*{box-sizing:border-box}
+.cs-btn,.cs-btn2,.cs-mi,.cs-row,.cs-ib,.cs-chipbtn{transition:background .15s ease,border-color .15s ease}
+.cs-nav a:hover{background:#FBF8F0}
+.cs-btn:hover{background:#485F30 !important}
+.cs-btn2:hover{background:#FBF8F0 !important;border-color:#CFCDBF !important}
+.cs-mi:hover,.cs-mi:focus-visible{background:#EEF2E1}
+.cs-row:hover{background:#FBF8F0}
+.cs-ib:hover{background:#E3EACF !important;border-color:#9CAB84 !important}
+.cs-chipbtn:hover{background:#E3EACF !important}
+.cs-card:hover{border-color:#9CAB84}
+.cs-card2 span{white-space:normal !important}
+html,body{overflow-x:hidden;max-width:100%}
+table th,table td{white-space:normal !important;overflow-wrap:anywhere}
+img,svg,table{max-width:100%}
+@media (max-width: 760px){
+ .cs-step-f{display:none !important}
+ .cs-step-c{display:block !important}
+ .cs-pbtns{display:grid !important;grid-template-columns:1fr 1fr;gap:10px !important;width:100%}
+ .cs-pbtns>*{justify-content:center;min-height:48px !important;white-space:normal;text-align:center}
+ .cs-acts{flex-wrap:wrap !important}
+ .cs-acts>*{flex:1 1 90px !important;min-height:46px !important;font-size:13.5px !important;white-space:nowrap}
+ .cs-bar{flex-direction:column !important;align-items:stretch !important}
+ .cs-bar>*,.cs-bar a{width:100%;justify-content:center}
+ .cs-card2{min-width:0 !important;overflow:hidden}
+ .cs-card2 span{overflow-wrap:anywhere}
+}
+@keyframes csIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes csFade{from{opacity:0}to{opacity:1}}
+@keyframes csSpin{to{transform:rotate(360deg)}}
+@keyframes csRipple{from{transform:scale(0);opacity:.45}to{transform:scale(4);opacity:0}}
+@keyframes csPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.18);opacity:.45}}
+@keyframes csScan{0%{top:4%}50%{top:92%}100%{top:4%}}
+@keyframes csOrbit{to{transform:rotate(360deg)}}
+@keyframes csShimmer{from{background-position:-200px 0}to{background-position:200px 0}}
+@keyframes csDots{0%,20%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+@keyframes csPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes csBar{0%{width:0}60%{width:75%}100%{width:92%}}
+@keyframes csWrite{from{width:0}to{width:100%}}
+main{animation:csIn .45s ease both}
+main>*{animation:csIn .5s ease both}
+main>*:nth-child(2){animation-delay:.05s}main>*:nth-child(3){animation-delay:.1s}main>*:nth-child(4){animation-delay:.15s}
+main>*:nth-child(5){animation-delay:.2s}main>*:nth-child(6){animation-delay:.25s}
+.cs-btn,.cs-btn2{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease,box-shadow .15s ease}
+.cs-btn:hover{box-shadow:0 4px 12px rgba(60,80,40,.25)}
+.cs-btn:active,.cs-btn2:active,.cs-ib:active,.cs-chipbtn:active{transform:scale(.96)}
+.cs-rip{position:absolute;border-radius:50%;width:40px;height:40px;margin:-20px 0 0 -20px;background:rgba(255,255,255,.55);pointer-events:none;animation:csRipple .6s ease-out forwards}
+.cs-btn2 .cs-rip,.cs-ib .cs-rip{background:rgba(86,112,58,.28)}
+.cs-ib{position:relative;overflow:hidden;transition:background .15s ease,border-color .15s ease,transform .12s ease}
+.cs-working{pointer-events:none;opacity:.85}
+.cs-working::after{content:"";display:inline-block;width:14px;height:14px;margin-left:8px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:csSpin .7s linear infinite}
+.cs-row,.cs-card{transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.cs-card:hover{transform:translateY(-2px)}
+#cs-load{position:fixed;inset:0;z-index:9999;background:rgba(246,242,230,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:csFade .2s ease both}
+#cs-load.on{display:flex}
+#cs-load .ring{width:54px;height:54px;border-radius:50%;border:4px solid #DCE3C6;border-top-color:#56703A;animation:csSpin .8s linear infinite}
+#cs-load .lt{font:600 14px Manrope,sans-serif;color:#55584E}
+#cs-top{position:fixed;top:0;left:0;height:3px;width:0;background:#56703A;z-index:10000;opacity:0}
+#cs-top.go{opacity:1;animation:csBar 1.4s ease-out forwards}
+.cs-dots span{animation:csDots 1.2s infinite}.cs-dots span:nth-child(2){animation-delay:.2s}.cs-dots span:nth-child(3){animation-delay:.4s}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important}}
+@media (max-width: 760px){
+ .cs-side{flex-basis:100% !important;border-right:none !important;border-bottom:1px solid #E5E4DA}
+ .cs-side .cs-nav{flex-direction:row !important;overflow-x:auto}
+ .cs-side .cs-nav a{white-space:nowrap}
+ .cs-side .cs-foot{display:none !important}
+ .cs-hide-sm{display:none !important}
+}
+
+.cs-side{display:none !important}
+main{padding:16px 16px 104px !important;gap:18px !important;max-width:100% !important}
+h1{font-size:22px !important;line-height:1.25 !important}
+h2{font-size:17px !important}
+main section,main aside,main article{padding:16px !important}
+main [style*="grid-template-columns"]{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+table thead{display:none}
+table,table tbody,table tr,table td{display:block;width:100% !important}
+table tr{border:1px solid #E3E0D3;border-radius:12px;margin-bottom:10px;padding:6px 4px;background:#fff}
+table td{border:none !important;padding:6px 12px !important}
+.cs-btn,.cs-btn2{min-height:46px}
+.m-top{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:rgba(246,242,230,.96);border-bottom:1px solid #E3E0D3;backdrop-filter:blur(6px)}
+.m-tab{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #E3E0D3;box-shadow:0 -4px 16px rgba(40,40,30,.06);animation:csIn .4s ease both}
+.m-tab a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;justify-content:center;border-radius:12px;font:600 11px Manrope,sans-serif;color:#6B6E60;text-decoration:none;transition:background .15s,color .15s,transform .12s}
+.m-tab a:active{transform:scale(.92)}
+.m-tab a.on{color:#56703A;background:#EEF2E1}
+.m-tab a.on svg{animation:csPop .4s ease both}
+</style>
+</helmet>
+<div style="font-family: Manrope, Inter, system-ui, sans-serif; color: #20231D; background: #F6F2E6; min-height: 100vh; width: 100%"><div class="m-top"><span style="display:flex;align-items:center;gap:8px;font:800 17px Manrope,sans-serif;color:#22241E"><span style="width:28px;height:28px;border-radius:8px;background:#56703A;display:inline-block"></span>CRATE-SCAN</span><span style="padding:5px 10px;border-radius:999px;background:#EEF2E1;color:#56703A;font:700 12px Manrope,sans-serif">Inspector</span></div>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh">
+<aside class="cs-side" style="flex: 0 0 256px; background: #FFFFFF; border-right: 1px solid #E5E4DA; padding: 26px 18px; display: flex; flex-direction: column; gap: 28px">
+<a href="M_Main.dc.html" style="text-decoration: none; padding: 0 6px"><div style="display: flex; align-items: center; gap: 10px"><svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true" style="flex-shrink: 0"><path d="M4 13V6a2 2 0 0 1 2-2h7M27 4h7a2 2 0 0 1 2 2v7M36 27v7a2 2 0 0 1-2 2h-7M13 36H6a2 2 0 0 1-2-2v-7" stroke="#56703A" stroke-width="2.6" stroke-linecap="round"/><path d="M13 26c0-8 5-13 14-13 0 9-5 14-13 14" stroke="#56703A" stroke-width="2.2" stroke-linejoin="round" fill="#C5D89D"/><path d="M13 27l8-8" stroke="#56703A" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size: 19px; font-weight: 800; letter-spacing: -0.2px; color: #20231D">CRATE-SCAN</span></div></a>
+<nav class="cs-nav" aria-label="Main" style="display: flex; flex-direction: column; gap: 4px"><a href="M_InspectorDashboard.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>Dashboard</a><a href="M_NewInspection.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; background: #E3EACF; color: #20231D; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 5v14M5 12h14"/></svg>New Inspection</a><a href="M_InspectionHistory.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Inspection History</a><a href="M_InspectorProposals.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg>Product Proposals</a><a href="M_AskAI.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/></svg>Ask AI</a><a href="M_Profile.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-3.5 3.8-5 7-5s6 1.5 7 5"/></svg>Profile</a></nav>
+<div class="cs-foot" style="margin-top: auto; display: flex; flex-direction: column; gap: 4px">
+<a href="M_Main.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 44px; border-radius: 9px; text-decoration: none; font-size: 14.5px; color: #55584E; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/></svg>Log out</a>
+</div>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 36px clamp(18px, 3.5vw, 48px) 56px; display: flex; flex-direction: column; gap: 28px; max-width: 1280px">
+<a href="M_VerifyFields.dc.html" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; text-decoration: none; color: #55584E"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back to verification</a>
+<header style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.4px">AI Review</h1>
+<p style="margin: 0; font-size: 15.5px; color: #55584E">Running reference, licence, packaging and labelling checks on your approved values.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 14px"><span style="padding: 4px 10px; border-radius: 6px; background: #E3EACF; color: #3B5420; font-size: 12.5px; font-weight: 700; white-space: nowrap">Step 3 of 5</span>
+<a href="M_Profile.dc.html" aria-label="Account" style="width: 42px; height: 42px; border-radius: 21px; background: #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; text-decoration: none; flex-shrink: 0">IS</a>
+</div>
+</header>
+<ol class="cs-step-f" aria-label="Inspection progress" style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #20231D"><span style="width: 28px; height: 28px; border-radius: 14px; background: #56703A; border: 1.5px solid #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Photographs</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #56703A; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #20231D"><span style="width: 28px; height: 28px; border-radius: 14px; background: #56703A; border: 1.5px solid #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Verify Fields</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #56703A; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #20231D"><span style="width: 28px; height: 28px; border-radius: 14px; background: #56703A; border: 1.5px solid #56703A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">3</span>AI Review</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">4</span>Findings</li><li aria-hidden="true" style="flex: 1 1 20px; height: 1.5px; background: #D9D7CA; min-width: 16px"></li><li style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #686B60"><span style="width: 28px; height: 28px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #CFCDBF; color: #686B60; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0">5</span>Report</li></ol><div class="cs-step-c" role="group" aria-label="Inspection progress" style="display: none; background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 14px 16px"><div style="display: flex; align-items: center; justify-content: space-between; gap: 10px"><span style="font-size: 12.5px; font-weight: 700; color: #686B60; letter-spacing: 0.4px">STEP 3 OF 5</span><span style="font-size: 15px; font-weight: 800; color: #56703A">AI Review</span></div><div style="height: 6px; border-radius: 3px; background: #EFEDE4; margin-top: 10px; overflow: hidden"><div style="height: 100%; width: 50%; border-radius: 3px; background: #56703A; transition: width .5s ease"></div></div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 700">{{label}}</h2>
+<sc-if value="{{running}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="cs-btn2" onClick="{{skip}}" style="padding: 8px 14px; min-height: 40px; border-radius: 8px; border: 1px solid #E5E4DA; background: #FFFFFF; color: #55584E; font: 600 13px Manrope, sans-serif; cursor: pointer">Skip animation</button>
+</sc-if>
+</div>
+<div style="height: 10px; border-radius: 5px; background: #EFEDE4; overflow: hidden"><div style="{{barStyle}}"></div></div>
+<sc-if value="{{running}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px; padding: 22px; border-radius: 12px; background: linear-gradient(135deg, #F1F5E4, #E7EDD6); border: 1px solid #DCE3C6">
+<div style="position: relative; width: 150px; height: 150px; flex-shrink: 0">
+<div style="position: absolute; inset: 0; border-radius: 50%; border: 2px dashed #9CAB84; animation: csOrbit 9s linear infinite"></div>
+<div style="position: absolute; inset: 14px; border-radius: 50%; border: 2px solid #C5D89D; animation: csPulse 1.8s ease-in-out infinite"></div>
+<div style="position: absolute; inset: 0; animation: csOrbit 3s linear infinite"><span style="position: absolute; top: -5px; left: 70px; width: 12px; height: 12px; border-radius: 6px; background: #56703A"></span></div>
+<div style="position: absolute; inset: 0; animation: csOrbit 5s linear infinite reverse"><span style="position: absolute; bottom: -4px; left: 72px; width: 9px; height: 9px; border-radius: 5px; background: #9CAB84"></span></div>
+<div style="position: absolute; inset: 34px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E5E4DA; overflow: hidden; display: flex; align-items: center; justify-content: center"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#56703A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/><path d="M4 12h16"/></svg>
+<span style="position: absolute; left: 0; right: 0; height: 3px; background: #56703A; box-shadow: 0 0 10px 2px #9CAB84; animation: csScan 1.8s ease-in-out infinite"></span></div>
+</div>
+<div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 8px; min-width: 0">
+<span style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.6px; color: #56703A">AI IS WORKING</span>
+<span style="font-size: 17px; font-weight: 700; line-height: 1.35">{{liveLine}}<span class="cs-dots"><span>.</span><span>.</span><span>.</span></span></span>
+<div style="height: 8px; border-radius: 4px; overflow: hidden; background: rgba(255,255,255,.7)"><div style="height: 100%; width: 100%; background: linear-gradient(90deg, #C5D89D 0%, #56703A 50%, #C5D89D 100%); background-size: 200px 100%; animation: csShimmer 1.2s linear infinite"></div></div>
+<span style="font-size: 13px; line-height: 1.55; color: #55584E">Your photographs and approved values stay saved. The AI only suggests; the final decision remains yours.</span>
+</div>
+</div>
+</sc-if>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="6">
+<li style="{{s.rowStyle}}">
+<span style="{{s.dotStyle}}">{{s.num}}</span>
+<span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span style="{{s.nameStyle}}">{{s.name}}</span>
+<span style="font-size: 13px; line-height: 1.5; color: #55584E">{{s.note}}</span>
+<sc-if value="{{s.running}}" hint-placeholder-val="{{ false }}">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: #56703A"><span style="width: 13px; height: 13px; border-radius: 50%; border: 2px solid #56703A; border-right-color: transparent; animation: csSpin .7s linear infinite"></span>Working<span class="cs-dots"><span>.</span><span>.</span><span>.</span></span></span>
+</sc-if>
+</span>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{finished}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 18px; border-radius: 10px; background: #EEF2E1; border: 1px solid #DCE3C6">
+<span style="display: inline-flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 700; color: #3B5420"><span style="display: inline-flex; animation: csPop .5s ease both"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3B5420" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg></span>5 findings ready for your review</span>
+<a class="cs-btn" href="M_InspectionResults.dc.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; min-height: 44px; border-radius: 10px; background: #56703A; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none; ">View Findings<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</div>
+</sc-if>
+</section>
+<aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 20px">
+<section style="background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Product under analysis</h2>
+<div style="display: flex; gap: 14px; align-items: center"><div style="width: 62px; height: 84px; border-radius: 10px; background: #FBF8EE; box-shadow: 0 6px 18px rgba(60,58,40,0.18); overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0"><div style="height: 24%; background: #4F6B3A; border-radius: 10px 10px 0 0"></div><div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 10px; color: #5A5C52; font-weight: 600">Harvest Lane</span><span style="font-size: 15px; font-weight: 800; line-height: 1.1; color: #2A2C24">Muesli</span></div><div style="margin: 4px auto 0; width: 58%; height: 26%; border-radius: 0 0 60px 60px; background: #E8D3A6; border: 3px solid #F6EFE0"></div></div>
+<span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span style="font-size: 14.5px; font-weight: 700; line-height: 1.3">Whole Grain Muesli — Nut &amp; Seed Mix</span>
+<span style="font-size: 13px; color: #55584E">Harvest Lane · 500 g</span>
+<span style="font-size: 12.5px; color: #686B60">Groceries &amp; Food Staples</span></span></div>
+<div style="height: 1px; background: #E5E4DA"></div>
+<dl style="margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><dt style="color: #686B60">Inspection</dt><dd style="margin: 0; font-weight: 600; text-align: right">CS-2026-0149</dd></div><div style="display: flex; justify-content: space-between; gap: 12px"><dt style="color: #686B60">Photographs</dt><dd style="margin: 0; font-weight: 600; text-align: right">3</dd></div><div style="display: flex; justify-content: space-between; gap: 12px"><dt style="color: #686B60">Fields approved</dt><dd style="margin: 0; font-weight: 600; text-align: right">21</dd></div><div style="display: flex; justify-content: space-between; gap: 12px"><dt style="color: #686B60">Corrections</dt><dd style="margin: 0; font-weight: 600; text-align: right">1</dd></div><div style="display: flex; justify-content: space-between; gap: 12px"><dt style="color: #686B60">Marked not present</dt><dd style="margin: 0; font-weight: 600; text-align: right">2</dd></div>
+</dl>
+</section>
+<section style="background: #FFFFFF; border: 1px solid #E5E4DA; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">If analysis fails</h2>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #55584E">If an AI provider is unavailable, the inspection is saved with your approved values. You can retry the analysis, or continue with OCR-only results, without losing the photographs or your checks.</p>
+</section>
+</aside>
+</div>
+</main>
+</div>
+</div>
+<nav class="m-tab" aria-label="Main"><a href="M_InspectorDashboard.dc.html" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Home</a><a href="M_NewInspection.dc.html" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Inspect</a><a href="M_InspectionHistory.dc.html" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>History</a><a href="M_AskAI.dc.html" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14v10H9l-4 3z"/></svg>Ask AI</a><a href="M_Profile.dc.html" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 5-6 8-6s7 2 8 6"/></svg>Profile</a></nav></x-dc>
+<div id="cs-top"></div>
+<div id="cs-load" role="status" aria-live="polite"><div class="ring"></div><div class="lt">Loading</div></div>
+<script>
+(function () {
+  var top = document.getElementById('cs-top'), load = document.getElementById('cs-load');
+  if (top) { top.className = 'go'; setTimeout(function () { top.style.transition = 'opacity .3s'; top.style.opacity = '0'; top.style.width = '100%'; }, 600); }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('a,button,.cs-ib') : null;
+    if (!el) return;
+    if (el.classList.contains('cs-btn') || el.classList.contains('cs-btn2') || el.classList.contains('cs-ib') || el.tagName === 'BUTTON') {
+      var r = el.getBoundingClientRect(), s = document.createElement('span');
+      s.className = 'cs-rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px';
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      el.appendChild(s); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 650);
+    }
+    var h = el.tagName === 'A' ? el.getAttribute('href') : null;
+    if (h && /\.dc\.html/.test(h) && el.target !== '_blank' && !e.metaKey && !e.ctrlKey) {
+      var lt = load.querySelector('.lt'); if (lt) lt.textContent = 'Loading';
+      load.className = 'on';
+      if (top) { top.style.transition = 'none'; top.style.opacity = '1'; top.style.width = '0'; top.className = ''; void top.offsetWidth; top.className = 'go'; }
+      setTimeout(function () { load.className = ""; }, 1200);
+    }
+  }, true);
+})();
+</script>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 3068}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.stages = [
+      ['Preparing approved values', 'Your confirmed and corrected fields are packaged for analysis.'],
+      ['Matching the reference database', 'Product, brand, variant and manufacturer compared with demonstration records.'],
+      ['Checking the demo licence record', 'Licence number, validity and status looked up in demonstration data.'],
+      ['Comparing packaging', 'Uploaded photographs compared with reference packaging images.'],
+      ['Applying labelling rules', 'Category rules for Groceries & Food Staples run against the approved values.'],
+      ['Assembling findings', 'Observations, evidence and rule references collected for your review.']
+    ];
+    this.state = { step: 1 };
+  }
+  componentDidMount() {
+    const self = this;
+    this.timer = setInterval(function () {
+      const s = self.state || {}; const next = (s.step || 0) + 1;
+      if (next > 6) { clearInterval(self.timer); return; }
+      self.setState({ step: next });
+    }, 1200);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const self = this;
+    const step = this.state.step || 1;
+    const stages = this.stages.map(function (s, i) {
+      const n = i + 1;
+      const done = n < step; const running = n === step; const wait = n > step;
+      const col = done ? '#3B5420' : (running ? '#56703A' : '#C2BFAE');
+      return {
+        name: s[0], note: s[1], done: done, running: running, wait: wait,
+        rowStyle: 'transition: all .3s ease; display: flex; gap: 14px; padding: 16px 18px; border-radius: 10px; border: 1px solid ' + (running ? '#56703A' : '#E5E4DA') + '; background: ' + (running ? '#EEF2E1' : '#FFFFFF'),
+        dotStyle: 'transition: all .3s ease; width: 26px; height: 26px; border-radius: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: ' + (wait ? '#686B60' : '#FFFFFF') + '; background: ' + (wait ? '#EFEDE4' : col) + '; border: 1.5px solid ' + col,
+        num: n,
+        nameStyle: 'font-size: 15px; font-weight: ' + (wait ? '500' : '700') + '; color: ' + (wait ? '#686B60' : '#20231D')
+      };
+    });
+    const pct = Math.round(((step - 1) / 6) * 100);
+    const finished = step > 6;
+    return {
+      stages: stages, finished: finished, running: !finished,
+      pct: pct + '%',
+      barStyle: 'height: 100%; border-radius: 5px; background: #56703A; width: ' + (finished ? 100 : pct) + '%; transition: width .5s ease',
+      liveLine: this.stages[Math.min(step, 6) - 1][0],
+      label: finished ? 'Analysis complete' : 'Analysing — step ' + step + ' of 6',
+      skip: () => { clearInterval(self.timer); self.setState({ step: 7 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

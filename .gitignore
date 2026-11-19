@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+*service-account*.json
+firebase-adminsdk*.json
+__pycache__/
+.venv/
+node_modules/
+.next/
+out/
+coverage/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+*.log
+.DS_Store
