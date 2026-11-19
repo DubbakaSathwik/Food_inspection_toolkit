@@ -87,3 +87,10 @@ the deploy configuration, CI workflows and `DEPLOYMENT.md` together.
 | T-35 | Backend test setup no longer wipes all Auth-emulator accounts (it broke the shared local dev stack); test users use unique emails and the test DB is dropped. | Found while running backend tests next to the e2e stack. |
 | T-36 | `scripts/local-stack.sh [--fresh]` starts MongoDB, the Auth emulator, the API (fake AI) and the frontend build for development and e2e. | Repeatable local integration environment. |
 | T-37 | When the forced token refresh after a `claims_stale` answer fails (refresh tokens revoked on disable), the auth context keeps the non-active profile so the "account disabled" screen shows; after a full reload Firebase signs the revoked session out and signing in again shows the same screen. | Bug found by the disable journey on mobile: the user was stuck on "Checking your access…". |
+
+## Phase 4 decisions (2026-11-19)
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| T-38 | **Rate limiting re-implemented** as `app/ratelimit.py` (ASGI middleware, per client IP, fixed one-minute windows: default / write / AI buckets, 429 JSON + `Retry-After`, placed inside CORS). slowapi removed. | Phase 4 manual check found slowapi 0.1.10's middleware never matched our route handlers, so **no limits applied** (7/7 requests passed a 5/minute limit). Now verified live (4×200 then 429) and by `tests/test_ratelimit.py`. In-memory counters are per process (single Render instance); a shared store is needed if scaled out. |
+| T-39 | The local stack and CI run the API with very high rate limits for automated end-to-end runs (all traffic comes from one IP); production uses the defaults in `.env.example`. | Test traffic is not user traffic. |

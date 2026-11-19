@@ -11,7 +11,7 @@ from fastapi.responses import Response, StreamingResponse
 from app.auth import require_admin, revoke_tokens, set_claims
 from app.config import get_settings
 from app.errors import AppError, not_found
-from app.http import WRITE_LIMIT, csv_response, file_response, limiter, read_upload
+from app.http import csv_response, file_response, read_upload
 from app.models.admin import (
     AdminDashboardOut,
     AnalyticsOut,
@@ -99,7 +99,6 @@ async def get_rule(p: Admin, rule_id: str) -> dict[str, Any]:
 
 
 @router.post("/rules", response_model=RuleOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def create_rule(request: Request, p: Admin, body: RuleIn) -> dict[str, Any]:
     return await rules.create(p, body.model_dump())
 
@@ -175,7 +174,6 @@ async def proposal_report(p: Admin, proposal_id: str) -> StreamingResponse:
 
 
 @router.post("/proposals/{proposal_id}/decision", response_model=ProposalOut)
-@limiter.limit(WRITE_LIMIT)
 async def decide_proposal(
     request: Request, p: Admin, proposal_id: str, body: ProposalDecisionIn
 ) -> dict[str, Any]:
@@ -381,7 +379,6 @@ async def patch_settings(p: Admin, body: SettingsPatch) -> dict[str, Any]:
 
 
 @router.put("/settings/images/{key}", response_model=SettingsOut)
-@limiter.limit(WRITE_LIMIT)
 async def upload_site_image(
     request: Request, p: Admin, key: str, file: Annotated[UploadFile, File()]
 ) -> dict[str, Any]:

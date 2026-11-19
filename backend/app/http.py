@@ -1,4 +1,4 @@
-"""Shared HTTP helpers: rate limiter, upload reading, file responses, CSV/XLSX exports."""
+"""Shared HTTP helpers: upload reading, file responses, CSV/XLSX exports."""
 
 from __future__ import annotations
 
@@ -9,20 +9,8 @@ from typing import Any
 
 from fastapi import UploadFile
 from fastapi.responses import Response, StreamingResponse
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
-from app.config import get_settings
 from app.errors import AppError
-
-_s = get_settings()
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=[_s.rate_limit_default],
-    enabled=_s.app_env != "test",
-)
-AI_LIMIT = _s.rate_limit_ai
-WRITE_LIMIT = _s.rate_limit_write
 
 
 async def read_upload(file: UploadFile, max_bytes: int) -> bytes:

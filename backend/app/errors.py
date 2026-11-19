@@ -10,7 +10,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError, PyMongoError
-from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 log = logging.getLogger("crate_scan.errors")
@@ -96,13 +95,6 @@ def install_error_handlers(app: FastAPI) -> None:
         code = _STATUS_CODES.get(exc.status_code, "error")
         msg = exc.detail if isinstance(exc.detail, str) else "Request failed."
         return JSONResponse(_body(code, msg), status_code=exc.status_code)
-
-    @app.exception_handler(RateLimitExceeded)
-    async def _rate(_: Request, exc: RateLimitExceeded) -> JSONResponse:
-        return JSONResponse(
-            _body("rate_limited", "Too many requests. Please wait a moment and try again."),
-            status_code=429,
-        )
 
     @app.exception_handler(DuplicateKeyError)
     async def _dup(_: Request, exc: DuplicateKeyError) -> JSONResponse:

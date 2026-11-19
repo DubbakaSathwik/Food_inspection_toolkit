@@ -12,11 +12,8 @@ from app.auth import current_principal, require_inspector
 from app.config import get_settings
 from app.errors import not_found
 from app.http import (
-    AI_LIMIT,
-    WRITE_LIMIT,
     csv_response,
     file_response,
-    limiter,
     read_upload,
     xlsx_response,
 )
@@ -63,7 +60,6 @@ async def dashboard(p: Insp) -> dict[str, Any]:
 
 
 @router.post("/inspections", response_model=InspectionOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def create(request: Request, p: Insp) -> dict[str, Any]:
     await maintenance.maybe_cleanup()
     cfg = await settings_repo.load()
@@ -169,7 +165,6 @@ async def delete(p: Insp, inspection_id: str) -> dict[str, Any]:
 
 
 @router.post("/inspections/{inspection_id}/photos", response_model=InspectionOut, status_code=201)
-@limiter.limit(WRITE_LIMIT)
 async def upload_photo(
     request: Request,
     p: Insp,
@@ -226,7 +221,6 @@ async def delete_photo(p: Insp, inspection_id: str, photo_id: str) -> dict[str, 
 
 
 @router.post("/inspections/{inspection_id}/extract", response_model=InspectionOut)
-@limiter.limit(AI_LIMIT)
 async def extract(request: Request, p: Insp, inspection_id: str) -> dict[str, Any]:
     return await _full(p, await workflow.extract(p, inspection_id))
 
@@ -249,7 +243,6 @@ async def set_category(p: Insp, inspection_id: str, body: CategoryIn) -> dict[st
 
 
 @router.post("/inspections/{inspection_id}/analyze", response_model=InspectionOut)
-@limiter.limit(AI_LIMIT)
 async def analyze(request: Request, p: Insp, inspection_id: str) -> dict[str, Any]:
     return await _full(p, await workflow.analyse(p, inspection_id))
 
@@ -271,7 +264,6 @@ async def set_decision(p: Insp, inspection_id: str, body: DecisionIn) -> dict[st
 
 
 @router.post("/inspections/{inspection_id}/report", response_model=InspectionOut)
-@limiter.limit(WRITE_LIMIT)
 async def generate_report(
     request: Request, p: Insp, inspection_id: str, body: ReportIn
 ) -> dict[str, Any]:

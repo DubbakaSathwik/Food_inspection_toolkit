@@ -18,7 +18,8 @@ fi
 cd "$ROOT/backend"
 export APP_ENV=development MONGODB_DB_NAME="${MONGODB_DB_NAME:-crate_scan_dev}" FIREBASE_PROJECT_ID=demo-cratescan \
   FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 AI_PROVIDER_ORDER="${AI_PROVIDER_ORDER:-fake}" SUPER_ADMIN_EMAIL=admin@example.com \
-  CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+  CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000 \
+  RATE_LIMIT_DEFAULT="${RATE_LIMIT_DEFAULT:-100000/minute}" RATE_LIMIT_WRITE="${RATE_LIMIT_WRITE:-100000/minute}" RATE_LIMIT_AI="${RATE_LIMIT_AI:-100000/minute}"
 if [[ "${1:-}" == "--fresh" ]]; then
   docker exec cs-mongo mongosh --quiet "$MONGODB_DB_NAME" --eval 'db.dropDatabase()' >/dev/null
   curl -s -X DELETE "127.0.0.1:9099/emulator/v1/projects/demo-cratescan/accounts" >/dev/null
@@ -26,7 +27,8 @@ fi
 uv run python -m scripts.migrate
 pkill -f "uvicorn app.main:app" 2>/dev/null || true
 setsid nohup uv run uvicorn app.main:app --port 8000 >"$LOGS/api.log" 2>&1 &
-for _ in $(seq 1 30); do curl -sf localhost:8000/health >/dev/null && break; sleep 1; done
+for _ in $(seq 1 90); do curl -sf localhost:8000/health >/dev/null && break; sleep 1; done
+curl -sf localhost:8000/health >/dev/null || { echo "API did not start; see $LOGS/api.log" >&2; exit 1; }
 [[ "${1:-}" == "--fresh" ]] && uv run python -m scripts.dev_seed
 
 cd "$ROOT/frontend"

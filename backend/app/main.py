@@ -9,14 +9,13 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi.middleware import SlowAPIMiddleware
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.auth import init_firebase
 from app.config import get_settings
 from app.db import close_client
 from app.errors import install_error_handlers
-from app.http import limiter
+from app.ratelimit import RateLimitMiddleware
 from app.routers import admin, admin_reference, assistant, inspections, me, proposals, public
 
 
@@ -113,10 +112,16 @@ def create_app() -> FastAPI:
         redoc_url=None,
         openapi_url="/openapi.json" if docs else None,
     )
-    app.state.limiter = limiter
     install_error_handlers(app)
     _security_headers(app)
-    app.add_middleware(SlowAPIMiddleware)
+    # Inside CORS (added first = inner) so 429 answers still carry CORS headers the browser can read.
+    app.add_middleware(
+        RateLimitMiddleware,
+        default=s.rate_limit_default,
+        write=s.rate_limit_write,
+        ai=s.rate_limit_ai,
+        enabled=s.app_env != "test",
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=s.cors_origins,
