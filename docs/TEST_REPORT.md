@@ -165,6 +165,10 @@ Analytics/Audit filters clicked through the UI (rendered with live data; audit e
   desktop and mobile), Build ✓ (bundle scan clean, production start `/health` ok). Deploy and smoke: skipped as designed (they run
   only on pushes to `main`; no deployment secrets exist yet).
 
+- Run 3 (`44545482817`, commit 73678c9, docs only): Tests ✗ — flaky e2e assertion in `j2-inspection` (after "Confirm issue"
+  the card shows that text on both the status chip and the still-present button; Playwright strict mode found two matches depending
+  on timing). Test now asserts on the status chip; j2 re-run 3× on desktop and mobile locally: 12/12 passed. App code unchanged.
+
 ### Not verified in Phase 4
 Deploy and smoke jobs (need `main` + owner's Render/Netlify secrets) · real Google sign-in · real AI providers · Atlas ·
 Render's handling of `render.yaml` (render.com docs were not reachable from the build environment; values follow standard Render

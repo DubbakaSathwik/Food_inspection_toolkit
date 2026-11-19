@@ -52,7 +52,8 @@ test("full inspection: photos → crop → AI reading → corrections → AI rev
   // Step 4 — findings and decision
   const allergen = page.getByRole("article", { name: "Allergen declaration" });
   await allergen.getByRole("button", { name: "Confirm issue" }).click();
-  await expect(allergen.getByText("Confirm issue")).toBeVisible();
+  // The decision buttons stay on the card, so check the status chip (not any "Confirm issue" text).
+  await expect(allergen.locator(".cs-chip", { hasText: "Confirm issue" })).toBeVisible();
   const claim = page.getByRole("article", { name: "Health and nutrition claims" });
   await claim.getByRole("button", { name: "Not an issue" }).click();
   await claim.getByRole("textbox", { name: "Reason" }).fill("Claim substantiated on the back panel");
