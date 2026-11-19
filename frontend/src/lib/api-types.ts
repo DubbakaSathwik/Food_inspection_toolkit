@@ -72,6 +72,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diagnostics List */
+        get: operations["diagnostics_list_api_v1_admin_diagnostics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/diagnostics/{check_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Diagnostics Run */
+        post: operations["diagnostics_run_api_v1_admin_diagnostics__check_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/proposals": {
         parameters: {
             query?: never;
@@ -1316,6 +1350,36 @@ export interface components {
              * @default
              */
             remarks: string;
+        };
+        /** DiagnosticInfo */
+        DiagnosticInfo: {
+            /** Description */
+            description: string;
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+        };
+        /** DiagnosticOut */
+        DiagnosticOut: {
+            /** Detail */
+            detail: string;
+            /**
+             * Hints
+             * @default []
+             */
+            hints: string[];
+            /** Id */
+            id: string;
+            /** Ms */
+            ms: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "warn" | "fail" | "skip";
+            /** Title */
+            title: string;
         };
         /** ExtractionAttempt */
         ExtractionAttempt: {
@@ -2818,6 +2882,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminDashboardOut"];
+                };
+            };
+        };
+    };
+    diagnostics_list_api_v1_admin_diagnostics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticInfo"][];
+                };
+            };
+        };
+    };
+    diagnostics_run_api_v1_admin_diagnostics__check_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

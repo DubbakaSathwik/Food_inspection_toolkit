@@ -50,3 +50,15 @@ test("audit logs: action filter, search, change details and CSV export", async (
   expect(text).toContain(code);
   expect(text).not.toContain("user.approve"); // export respects the action filter
 });
+
+test("diagnostics: run all checks and see database working, unconfigured AI not tested", async ({ page }) => {
+  await page.goto("/admin/diagnostics");
+  await page.getByRole("button", { name: "Run all checks" }).click();
+  const db = page.getByRole("region", { name: "Database (MongoDB)" });
+  await expect(db.getByText("Working")).toBeVisible();
+  await expect(db.getByText(/MongoDB reachable/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "AI — Gemini" }).getByText("Not tested")).toBeVisible();
+  await expect(page.getByRole("region", { name: "File storage (GridFS)" }).getByText("Working")).toBeVisible();
+  await page.getByRole("button", { name: "Test Configuration" }).click();
+  await expect(page.getByRole("status", { name: "Configuration result" })).toBeVisible();
+});

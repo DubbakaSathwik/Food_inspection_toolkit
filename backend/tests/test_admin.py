@@ -272,3 +272,23 @@ async def test_users_listing_and_detail(admin: User, inspector: User) -> None:
     r = await admin.get(f"/api/v1/admin/users/{inspector.uid}")
     assert r.status_code == 200 and r.json()["email"] == inspector.email
     assert (await admin.get("/api/v1/admin/users", params={"status": "weird"})).status_code == 422
+
+
+async def test_diagnostics_admin_only_and_secret_free(admin: User, inspector: User) -> None:
+    assert (await inspector.get("/api/v1/admin/diagnostics")).status_code == 403
+    assert (await inspector.post("/api/v1/admin/diagnostics/config")).status_code == 403
+    items = (await admin.get("/api/v1/admin/diagnostics")).json()
+    ids = [i["id"] for i in items]
+    assert {"config", "database", "storage", "firebase", "gemini", "ocr"} <= set(ids)
+    results = {}
+    for cid in ids:
+        r = await admin.post(f"/api/v1/admin/diagnostics/{cid}")
+        assert r.status_code == 200, r.text
+        results[cid] = r.json()
+        assert results[cid]["status"] in ("ok", "warn", "fail", "skip")
+    assert results["database"]["status"] == "ok"
+    assert results["storage"]["status"] == "ok"
+    assert results["gemini"]["status"] == "skip"  # test environment uses the fake provider only
+    body = str(results).lower()
+    assert "mongodb://" not in body and "private_key" not in body
+    assert (await admin.post("/api/v1/admin/diagnostics/nope")).status_code == 404

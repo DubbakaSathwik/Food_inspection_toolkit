@@ -28,6 +28,7 @@ const NAV: Record<Area, NavItem[]> = {
     { href: "/admin/users", label: "User Management", icon: "users" },
     { href: "/admin/analytics", label: "Analytics", icon: "chart" },
     { href: "/admin/audit", label: "Audit Logs", icon: "logs" },
+    { href: "/admin/diagnostics", label: "Diagnostics", icon: "check" },
     { href: "/admin/settings", label: "Settings", icon: "settings" },
   ],
 };
@@ -51,7 +52,12 @@ const TABS: Record<Area, Tab[]> = {
     { href: "/admin/reference", label: "Products", icon: "box", match: (p) => p.startsWith("/admin/reference") },
     { href: "/admin/users", label: "Users", icon: "users", match: (p) => p.startsWith("/admin/users") },
     { href: "/admin/analytics", label: "Analytics", icon: "chart", match: (p) => p.startsWith("/admin/analytics") },
-    { href: "/admin/settings", label: "More", icon: "menu", match: (p) => /^\/admin\/(settings|rules|proposals|audit)/.test(p) },
+    {
+      href: "/admin/settings",
+      label: "More",
+      icon: "menu",
+      match: (p) => /^\/admin\/(settings|rules|proposals|audit|diagnostics)/.test(p),
+    },
   ],
 };
 

@@ -165,6 +165,10 @@ Analytics/Audit filters clicked through the UI (rendered with live data; audit e
   desktop and mobile), Build ✓ (bundle scan clean, production start `/health` ok). Deploy and smoke: skipped as designed (they run
   only on pushes to `main`; no deployment secrets exist yet).
 
+- Run 3 (`44545482817`, commit 73678c9, docs only): Tests ✗ — flaky e2e assertion in `j2-inspection` (after "Confirm issue"
+  the card shows that text on both the status chip and the still-present button; Playwright strict mode found two matches depending
+  on timing). Test now asserts on the status chip; j2 re-run 3× on desktop and mobile locally: 12/12 passed. App code unchanged.
+
 ### Not verified in Phase 4
 Deploy and smoke jobs (need `main` + owner's Render/Netlify secrets) · real Google sign-in · real AI providers · Atlas ·
 Render's handling of `render.yaml` (render.com docs were not reachable from the build environment; values follow standard Render
@@ -173,3 +177,13 @@ Python settings and are documented as manual fallback in `docs/DEPLOYMENT.md` §
 ### New tests
 `tests/test_ratelimit.py` (limit parsing, buckets, 429 format), `test_health.py` (HEAD, NoSQL operator objects rejected /
 treated as literal text), e2e `j7-analytics-audit.spec.ts`.
+
+## Post-handoff addition — Admin diagnostics page (2026-11-19)
+Requested by the owner after local testing with real keys failed with opaque errors ("HTTP 503/410/403").
+- New page **Admin → Diagnostics** (`/admin/diagnostics`) and endpoints `GET /api/v1/admin/diagnostics`,
+  `POST /api/v1/admin/diagnostics/{check}`: configuration sanity (placeholders, example admin email, CORS), MongoDB, GridFS,
+  Firebase service account (live call), a live test call to each configured AI provider (Gemini, NVIDIA, Hugging Face) and OCR.
+  Each result shows status, the real reason and fix hints; no keys, passwords or URIs are ever returned. Admin-only.
+- Provider errors now include the provider's own reason (e.g. `HTTP 403 — API key not valid`) via `http_error()`.
+- Tests: `test_diagnostics_admin_only_and_secret_free` (65 backend tests, 88.6 %), e2e `diagnostics` journey (desktop + mobile;
+  j7 + screens 16/16 passed). Real-provider results themselves are not verifiable from the build environment.

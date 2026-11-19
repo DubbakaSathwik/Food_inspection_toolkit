@@ -58,3 +58,22 @@ def safe_error(e: Exception) -> str:
     msg = re.sub(r"key=[^&\s]+", "key=***", msg)
     msg = re.sub(r"(?i)(bearer|api[-_ ]?key)[:= ]+\S+", r"\1 ***", msg)
     return f"{type(e).__name__}: {msg[:160]}"
+
+
+def http_error(r: Any) -> ProviderError:
+    """ProviderError for a non-200 response, including the provider's own reason (no secrets)."""
+    reason = ""
+    try:
+        body = r.json()
+    except ValueError:
+        body = None
+    if isinstance(body, dict):
+        err = body.get("error", body)
+        if isinstance(err, dict):
+            reason = str(err.get("message") or err.get("detail") or err.get("title") or "")
+        else:
+            reason = str(err or body.get("detail") or body.get("title") or "")
+    elif isinstance(body, str):
+        reason = body
+    reason = re.sub(r"\s+", " ", reason).strip()
+    return ProviderError(f"HTTP {r.status_code}" + (f" — {reason[:110]}" if reason else ""))

@@ -186,3 +186,18 @@ class AnalyticsOut(OutModel):
     active: dict[str, int]
     ai_calls: dict[str, int]
     storage: StorageOut
+
+
+class DiagnosticInfo(OutModel):
+    id: str
+    title: str
+    description: str
+
+
+class DiagnosticOut(OutModel):
+    id: str
+    title: str
+    status: Literal["ok", "warn", "fail", "skip"]
+    detail: str
+    hints: list[str] = []
+    ms: int
