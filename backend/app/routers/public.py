@@ -15,6 +15,7 @@ router = APIRouter(tags=["public"])
 
 
 @router.get("/health")
+@router.head("/health", include_in_schema=False)
 async def health_check() -> JSONResponse:
     ok = await health.ping()
     return JSONResponse(

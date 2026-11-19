@@ -1,0 +1,52 @@
+# Render Blueprint for the CRATE-SCAN backend (A1: Render web service, free instance).
+# Deploys are triggered by GitHub Actions through a deploy hook after CI passes (F1) — autoDeploy is off.
+# Secrets marked `sync: false` are entered once in the Render dashboard; they never live in Git.
+# See docs/DEPLOYMENT.md §3.
+services:
+  - type: web
+    name: crate-scan-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: backend
+    autoDeploy: false
+    buildCommand: pip install "uv==0.11.32" && uv sync --frozen --no-dev && .venv/bin/python -m scripts.migrate
+    startCommand: .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.12"
+      - key: UV_PROJECT_ENVIRONMENT
+        value: .venv
+      - key: APP_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: crate_scan
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: SUPER_ADMIN_EMAIL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: AI_PROVIDER_ORDER
+        value: gemini,nvidia,huggingface
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: HF_API_KEY
+        sync: false
+      - key: OCR_ENABLED
+        value: "false"
+      - key: RATE_LIMIT_DEFAULT
+        value: 240/minute
+      - key: RATE_LIMIT_WRITE
+        value: 60/minute
+      - key: RATE_LIMIT_AI
+        value: 12/minute
