@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from fastapi import APIRouter
@@ -18,10 +19,13 @@ router = APIRouter(tags=["public"])
 @router.head("/health", include_in_schema=False)
 async def health_check() -> JSONResponse:
     ok = await health.ping()
-    return JSONResponse(
-        {"status": "ok" if ok else "degraded", "database": "ok" if ok else "unavailable"},
-        status_code=200 if ok else 503,
-    )
+    body = {"status": "ok" if ok else "degraded", "database": "ok" if ok else "unavailable"}
+    commit = os.environ.get("RENDER_GIT_COMMIT", "")[
+        :7
+    ]  # lets the post-deploy check wait for the new release
+    if commit:
+        body["version"] = commit
+    return JSONResponse(body, status_code=200 if ok else 503)
 
 
 @router.get("/api/v1/public/site-images")

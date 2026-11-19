@@ -8,7 +8,7 @@ from tests.conftest import make_user
 async def test_health(client: httpx.AsyncClient) -> None:
     r = await client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok", "database": "ok"}
+    assert r.json()["status"] == "ok" and r.json()["database"] == "ok"
     assert r.headers["x-content-type-options"] == "nosniff"
     assert r.headers["x-frame-options"] == "DENY"
     head = await client.head("/health")  # uptime monitors often use HEAD

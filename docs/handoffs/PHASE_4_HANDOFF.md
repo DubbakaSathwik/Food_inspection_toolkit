@@ -1,5 +1,8 @@
 # Phase 4 Handoff — CI/CD, Security Review, Documentation (final)
 
+> **Update:** hosting moved to Render only (DECISIONS T-40). Where this document mentions Netlify, deploy hooks or
+> deploy secrets, see `docs/DEPLOYMENT.md` and `render.yaml` for the current setup.
+
 - **Date:** 2026-11-19 · **Branch:** `feature/initial-build`
 - **Overall status:** **IMPLEMENTED WITH DOCUMENTED LIMITATIONS**
 - **CI:** GitHub Actions run `44542863042` — **success** (all jobs; deploy/smoke skipped by design on a feature branch)

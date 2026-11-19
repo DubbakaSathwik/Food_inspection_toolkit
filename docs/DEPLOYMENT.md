@@ -1,108 +1,84 @@
-# Deployment — CRATE-SCAN
+# Deployment — CRATE-SCAN (everything on Render)
 
-Target (owner decisions, `docs/DECISIONS.md`): **Render** web service for the FastAPI backend (A1), **Netlify** for the
-Next.js frontend (B1), **MongoDB Atlas Free** (C1) with GridFS for files (D3), **Firebase Authentication, Google only** (E2),
-about 60 users, and **auto-deploy from `main` after CI passes** (F1).
+Two Render web services from one `render.yaml`: **crate-scan-api** (FastAPI) and **crate-scan-web** (Next.js).
+Database is **MongoDB Atlas** (free), sign-in is **Firebase Authentication (Google only)**. About 60 users.
+Render deploys both services from `main` by itself **after the GitHub Actions checks pass**; no deploy tokens or hooks are needed.
 
-Nothing has been deployed by the build agent. Follow these steps in order. Allow about 1–2 hours the first time.
+Nothing here has been deployed by the build agent. Allow about 1 hour.
 
 ```
-GitHub push to main ──► CI (quality → tests → security/CodeQL → build) ──► deploy job
-                                                                            ├─ Render deploy hook → wait for /health
-                                                                            └─ Netlify CLI build + deploy → smoke test
+merge to main ─► GitHub Actions (quality, tests, security, build) ─► checks pass ─► Render builds + deploys API and website
+                                                                                      └─► release-check job confirms the new version is live
 ```
 
-## 1. MongoDB Atlas (C1)
-1. Create an Atlas project and a **free (M0)** cluster in the region closest to your users and to Render (e.g. Mumbai / Singapore).
-2. *Database Access* → add user `crate-scan-app`, password auth (auto-generate), role **readWrite** on database `crate_scan` only
-   (*Specific privileges*), not Atlas admin.
-3. *Network Access* → add `0.0.0.0/0` (Render free has no fixed outbound IP; see `SECURITY.md`).
-4. *Connect → Drivers* → copy the `mongodb+srv://…` string, insert the password. This is `MONGODB_URI`.
-5. Free tier limit is 512 MB. Admin → Analytics shows database and GridFS usage; photos are deleted after reports, so usage
-   stays low with 60 users. Turn on Atlas email alerts for storage.
+## Before you start
+- Rotate any key that was ever pasted into a chat or committed: Firebase service-account key, Atlas password, AI keys.
+- Run the app locally once (sign-in, one inspection, **Admin → Diagnostics** all green).
+- Free Render instances have 512 MB RAM. If the website build is killed for memory, upgrade `crate-scan-web` to Starter or build elsewhere.
 
-## 2. Firebase Authentication (E2)
-1. Create a Firebase project (Spark plan is enough). *Authentication → Sign-in method* → enable **Google** only.
-2. *Project settings → General → Your apps* → add a **Web app**. Copy `apiKey`, `authDomain`, `projectId`, `appId`
-   (these are public `NEXT_PUBLIC_*` values).
-3. *Project settings → Service accounts* → **Generate new private key**. The JSON file is a secret: paste it on one line into
-   Render as `FIREBASE_SERVICE_ACCOUNT_JSON`, then delete the downloaded file.
-4. *Authentication → Settings → Authorized domains* → add your Netlify domain (e.g. `crate-scan.netlify.app`) and any custom domain.
-5. Restrict the browser API key (Google Cloud Console → Credentials) to your site's referrers.
+## 1. MongoDB Atlas (10 min)
+1. Create a free (M0) cluster near your users (e.g. Mumbai or Singapore).
+2. *Database Access* → new user `crate-scan-app`, strong generated password, role **readWrite** on database `crate_scan` only.
+3. *Network Access* → add `0.0.0.0/0` (Render free has no fixed IP; the password and TLS protect it).
+4. *Connect → Drivers* → copy the `mongodb+srv://…` string and put the password in it (no `< >`). This is `MONGODB_URI`.
 
-## 3. Render backend (A1)
-1. Render dashboard → **New → Blueprint** → connect this GitHub repo → it reads `render.yaml` (service `crate-scan-api`,
-   root `backend`, free plan, `autoDeploy: false`, health check `/health`).
-   If you prefer a manual web service, use the same values:
-   - Build: `pip install "uv==0.11.32" && uv sync --frozen --no-dev && .venv/bin/python -m scripts.migrate`
-   - Start: `.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"`
-   - Health check path `/health`; env `PYTHON_VERSION=3.12.12`.
-   - Auto-Deploy: **Off** (GitHub Actions deploys after CI).
-2. Enter the secret env vars (`sync: false` in the blueprint):
+## 2. Firebase (10 min)
+1. Authentication → Sign-in method → **Google** enabled (only provider).
+2. Project settings → General → your **web app** → note `apiKey`, `authDomain`, `projectId`, `appId`.
+3. Project settings → Service accounts → **Generate new private key**. Convert it to one line (PowerShell):
+   `Get-Content key.json -Raw | ConvertFrom-Json | ConvertTo-Json -Compress -Depth 5`, then delete the downloaded file.
+4. (After step 4 below) Authentication → Settings → **Authorised domains** → add `crate-scan-web.onrender.com`
+   (or the real address Render gives your site).
 
-   | Variable | Value |
-   |----------|-------|
-   | `MONGODB_URI` | Atlas connection string (step 1) |
-   | `FIREBASE_PROJECT_ID` | Firebase project ID |
-   | `FIREBASE_SERVICE_ACCOUNT_JSON` | service-account JSON on one line |
-   | `SUPER_ADMIN_EMAIL` | your Google email — becomes Super Admin on first sign-in |
-   | `CORS_ALLOWED_ORIGINS` | `https://<your-site>.netlify.app` (exact, comma-separated if several) |
-   | `GEMINI_API_KEY`, `NVIDIA_API_KEY`, `HF_API_KEY` | AI keys (any you have; missing ones are skipped) |
+## 3. Put the code on `main` (5 min)
+Open a pull request `feature/initial-build` → `main`, wait for the green checks, merge.
+(Render deploys the `main` branch. In GitHub → Settings → Branches you can protect `main` and require the checks.)
 
-   Do **not** set `FIREBASE_AUTH_EMULATOR_HOST` (startup refuses it in production) or `AI_PROVIDER_ORDER=fake`.
-3. *Settings → Deploy Hook* → copy the URL (secret) for GitHub (`RENDER_DEPLOY_HOOK_URL`).
-4. Deploy once manually, then open `https://<service>.onrender.com/health` → `{"status":"ok","database":"ok"}`.
+## 4. Create the services on Render (20 min)
+1. Render dashboard → **New → Blueprint** → connect the GitHub repo → it reads `render.yaml` and proposes both services.
+2. Render asks for the values marked secret. Enter:
 
-**Migrations in production** run in the build command (`scripts.migrate`); they are idempotent (CI applies them twice) and
-recorded in the `migrations` collection. To preview: `uv run python -m scripts.migrate --dry-run` with the production
-`MONGODB_URI` in your shell (never commit it).
+   | Service | Variable | Value |
+   |---------|----------|-------|
+   | crate-scan-api | `MONGODB_URI` | Atlas string (step 1) |
+   | | `FIREBASE_PROJECT_ID` | Firebase project id |
+   | | `FIREBASE_SERVICE_ACCOUNT_JSON` | the key as ONE line of JSON (paste it raw, no extra quotes) |
+   | | `SUPER_ADMIN_EMAIL` | your real Google account |
+   | | `GEMINI_API_KEY`, `NVIDIA_API_KEY`, `NVIDIA_MODEL`, `HF_API_KEY` | AI keys / vision model names (leave blank what you do not have) |
+   | crate-scan-web | `NEXT_PUBLIC_FIREBASE_API_KEY`, `…_AUTH_DOMAIN`, `…_PROJECT_ID`, `…_APP_ID` | the four web-app values (step 2) |
 
-**Cold starts:** free instances sleep after ~15 idle minutes; the first request then takes up to about a minute. The app shows
-"Starting the server…" and retries automatically. No keep-alive pinging is configured (it would work against the free plan's
-intent); upgrade the instance if cold starts are a problem.
+3. Apply. The first build takes several minutes (API: installs packages and runs the database migrations; website: `pnpm build`).
+4. **Check the real addresses.** If Render named a service differently (e.g. `crate-scan-api-x7k2`), fix these two and redeploy:
+   - on **crate-scan-web**: `NEXT_PUBLIC_API_BASE_URL` = the API's real `https://….onrender.com` address (it is baked in at build → *Manual Deploy*)
+   - on **crate-scan-api**: `CORS_ALLOWED_ORIGINS` = the website's real `https://….onrender.com` address
+5. Open `https://<api>.onrender.com/health` → `{"status":"ok","database":"ok",…}`. Then open the website.
 
-## 4. Netlify frontend (B1)
-1. Netlify → **Add new site → Import from Git** → this repo. `netlify.toml` sets base `frontend`, `pnpm build`, the Next.js
-   runtime plugin and security headers.
-2. *Site configuration → Build & deploy → Continuous deployment* → **Stop builds** (GitHub Actions deploys after CI; F1).
-3. *Environment variables* (also add them as GitHub variables, step 5):
-   `NEXT_PUBLIC_API_BASE_URL=https://<service>.onrender.com`, `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`,
-   `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`, `NEXT_PUBLIC_USE_AUTH_EMULATOR=false`.
-4. *User settings → Applications → Personal access tokens* → new token (`NETLIFY_AUTH_TOKEN`). *Site configuration → Site
-   details* → Site ID (`NETLIFY_SITE_ID`).
-5. If the site's CSP in `netlify.toml` needs your exact Render URL, set `connect-src` accordingly (currently allows
-   `https://*.onrender.com` and Firebase/Google endpoints).
+## 5. First sign-in (5 min)
+Sign in with the `SUPER_ADMIN_EMAIL` Google account → you are Super Admin. Open **Admin → Diagnostics → Run all checks** on the live site:
+database, storage, Firebase and the AI providers should show *Working*. Approve other users in Admin → Users.
 
-## 5. GitHub
-1. *Settings → Environments* → create **production** (optionally add yourself as required reviewer → manual approval per deploy).
-2. Environment **secrets**: `RENDER_DEPLOY_HOOK_URL`, `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID`.
-3. Repository **variables**: `API_BASE_URL` (Render URL, no trailing slash), `SITE_URL` (Netlify URL), and the four
-   `NEXT_PUBLIC_FIREBASE_*` values.
-4. *Settings → Branches* → protect `main`: require a pull request, require status checks **Quality**, **Tests**, **Security**,
-   **CodeQL (python)**, **CodeQL (javascript-typescript)**, **Build**; block force pushes.
-5. *Settings → Code security*: enable Dependabot alerts + security updates, secret scanning + push protection, code scanning
-   (CodeQL results upload from CI). Dependabot PRs (`.github/dependabot.yml`) arrive weekly; merge them only when CI is green.
-6. Merge `feature/initial-build` into `main` via a pull request → CI runs → deploy → smoke test.
+If Google sign-in is blocked, open the browser console (F12). A "Content Security Policy" message means the website's
+security rules block it; set `CSP_REPORT_ONLY=true` on crate-scan-web, redeploy, and send me the message.
 
-## 6. First sign-in
-Open the Netlify URL, sign in with the `SUPER_ADMIN_EMAIL` Google account → you are Super Admin. Other people sign in, appear as
-**pending** in Admin → Users; approve them and assign *Inspector* or *Admin*. Then in Admin → Settings set the AI daily limit
-and photo retention days, and upload any site images.
+## 6. Optional: automatic release check in GitHub
+GitHub → Settings → Secrets and variables → Actions → **Variables**: `API_BASE_URL` and `SITE_URL` (the two Render addresses,
+no trailing slash). After each merge to `main` the `release-check` job waits until the API reports the new commit and then tests
+both services (health, CORS, security headers, docs hidden, `/me` needs sign-in). Without the variables the job is skipped.
 
-## 7. Rollback
-- **Frontend:** Netlify → *Deploys* → pick the previous deploy → **Publish deploy** (instant).
-- **Backend:** Render → service → *Events/Deploys* → previous deploy → **Rollback**.
-- **Code:** `git revert <commit>` on `main` (via PR) → CI redeploys. Never force-push `main`.
-- **Database:** migrations only add validators/indexes/seed data and are safe to leave in place on rollback. Atlas Free has no
-  point-in-time restore — export important collections before risky changes (`mongodump` with the app user).
+## Free-plan behaviour
+- Services **sleep after 15 idle minutes**; the next visit takes up to about a minute ("Starting the server…" is shown).
+- Two free services = two sleepers. A paid plan (about $7 each) removes sleeping.
+- Reference records and rules are **DEMO** data; replace them with official data before real use.
 
-## 8. Pre-launch checklist
-- [ ] Atlas user is readWrite-only on `crate_scan`; storage alert on
-- [ ] Firebase: Google only; authorized domains set; API key restricted
-- [ ] Render env complete; `APP_ENV=production`; `/health` ok; `/docs` returns 404
-- [ ] `CORS_ALLOWED_ORIGINS` = exact Netlify URL
-- [ ] At least one real AI key set and an extraction tested end to end (not verified during the build)
-- [ ] GitHub environment secrets/variables set; `main` protected; Dependabot + secret scanning on
-- [ ] Netlify and Render auto-builds off (deploys come only from CI)
-- [ ] First CI deploy + smoke job green; Super Admin sign-in works; a pending user approved
-- [ ] One full inspection on a phone: photos → extraction → findings → decision → PDF downloaded; originals removed afterwards
+## Rollback
+Render → the service → **Deploys** → previous deploy → **Rollback**. For code, `git revert` the commit on `main` via a pull request.
+Migrations only add validators, indexes and seed data; they are safe to leave in place. Atlas free has no point-in-time restore.
+
+## Pre-launch checklist
+- [ ] Atlas user is readWrite on `crate_scan` only; storage alert on
+- [ ] Firebase: Google only; the website address is an authorised domain; browser API key restricted to the site
+- [ ] API env complete, `APP_ENV=production`, `/health` ok, `/docs` returns 404
+- [ ] `CORS_ALLOWED_ORIGINS` is exactly the website address
+- [ ] Diagnostics all *Working* (at least one AI provider)
+- [ ] One full inspection on a phone: photos → AI reading → findings → decision → PDF
+- [ ] `main` protected; Dependabot and secret scanning on

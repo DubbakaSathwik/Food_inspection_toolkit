@@ -2,7 +2,7 @@
 
 ## 1. Request flow
 ```
-Browser ──HTTPS──▶ Netlify (Next.js 16 App Router, client-rendered app pages)
+Browser ──HTTPS──▶ Render web service (Next.js 16 App Router, client-rendered app pages)
    │  Firebase Web SDK: Google sign-in → ID token
    └──HTTPS + Authorization: Bearer <ID token>──▶ Render (FastAPI, Uvicorn)
                                                     ├─ Firebase Admin SDK: verify token / revocation / custom claims
@@ -15,7 +15,7 @@ The browser never talks to MongoDB or AI providers, and holds no server secrets.
 ## 2. Hosts and constraints
 | Part | Host | Constraints handled |
 |------|------|---------------------|
-| Frontend | Netlify (Next.js runtime) | Only `NEXT_PUBLIC_*` browser-safe variables; security headers in `netlify.toml`. |
+| Frontend | Render web service (Node, `next start`) | Only `NEXT_PUBLIC_*` browser-safe variables; security headers in `frontend/next.config.ts`. |
 | Backend | Render free web service | Sleeps after ~15 min → frontend pings `/health` on load and shows "Starting server…" with retry/backoff. 512 MB RAM → OCR disabled; images streamed from GridFS, processed one at a time. Port from `$PORT`. No migrations on start. |
 | Database | Atlas M0 (512 MB) | Photo originals temporary; PDF photos compressed (~1600 px, JPEG q72); storage usage shown in Analytics; cleanup job. |
 
@@ -117,7 +117,7 @@ Render paid instance (no spin-down), enable OCR on an instance with ≥ 2 GB RAM
 ## 12. CI/CD
 GitHub Actions `ci.yml`: quality → tests (Mongo service container + Firebase Auth emulator + Playwright) → security
 (gitleaks, pip-audit, pnpm audit, Bandit, CodeQL, bundle secret check, DAL rule) → build → deploy (main only: Render
-deploy hook → wait `/health` → Netlify CLI) → post-deploy smoke test. Weekly `security-scheduled.yml`; Dependabot.
+Render auto-deploys both services after the checks pass) → `release-check` job (waits for the new commit, smoke test). Weekly `security-scheduled.yml`; Dependabot.
 
 ## 13. Testing strategy
 Backend pytest against a disposable Mongo (`crate_scan_test` DB, dropped per session) and the Auth emulator (real

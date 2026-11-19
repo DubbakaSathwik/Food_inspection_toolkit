@@ -1,7 +1,7 @@
 # PROJECT_STATE — CRATE-SCAN
 
 - **Repository / branch:** `DubbakaSathwik/Food_inspection_toolkit` · `feature/initial-build`
-- **Deployment selections:** A1 Render · B1 Netlify · C1 Atlas Free · E2 Google only · D3 MongoDB GridFS · 60 users · F1 auto-deploy from `main` (see `docs/DECISIONS.md`)
+- **Deployment selections:** A1 Render (API **and** website, T-40) · C1 Atlas Free · E2 Google only · D3 MongoDB GridFS · 60 users · F1 auto-deploy from `main` (see `docs/DECISIONS.md`)
 - **Workflow:** phase by phase; a handoff doc in `docs/handoffs/` after every phase
 - **Completed phases:** 0 (docs), 1 (backend), 2 (frontend), 3 (integration), 4 (CI/CD, security, docs)
 - **Overall status:** **IMPLEMENTED WITH DOCUMENTED LIMITATIONS** (see `HANDOFF.md`)
