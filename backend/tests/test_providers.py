@@ -208,3 +208,30 @@ async def test_persistent_503_reports_provider_reason(monkeypatch: pytest.Monkey
     )
     with pytest.raises(ProviderError, match="HTTP 503 — high demand"):
         await GeminiProvider().extract([IMG], "p")
+
+
+async def test_reasoning_model_think_block_removed_and_cutoff_explained(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.services.ai import openai_compat as mod
+
+    monkeypatch.setattr(get_settings(), "nvidia_api_key", "k")
+    state: dict[str, Any] = {"cut_off": False, "max_tokens": 0}
+
+    def handler(r: httpx.Request) -> httpx.Response:
+        state["max_tokens"] = json.loads(r.content)["max_tokens"]
+        if state["cut_off"]:
+            msg = {"message": {"content": None}, "finish_reason": "length"}
+        else:
+            content = '<think>maybe {"x": 1}</think>{"fields": {}}'
+            msg = {"message": {"content": content}}
+        return httpx.Response(200, json={"choices": [msg]})
+
+    _patch_client(monkeypatch, mod, handler)
+    p = mod.nvidia()
+    p.model = "nvidia/some-reasoning-model"
+    assert (await p.extract([IMG], "p")) == {"fields": {}}
+    assert state["max_tokens"] >= 8192
+    state["cut_off"] = True
+    with pytest.raises(ProviderError, match="used all its tokens"):
+        await p.extract([IMG], "p")

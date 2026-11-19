@@ -192,3 +192,9 @@ Requested by the owner after local testing with real keys failed with opaque err
 Real-key testing showed Gemini returning `HTTP 503 — high demand`. Providers now retry temporary 5xx answers twice
 (after 2 s, then 5 s) before the chain moves to the next provider (`post_with_retry`). Tests: 503 → retry → success, and a persistent 503
 reports the provider's own reason. 67 backend tests passed (88.6 %). Not verified against the live Gemini service.
+
+### Reasoning vision models (2026-11-19)
+Owner tried `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`; extraction failed with "response was not JSON". OpenAI-compatible
+providers now remove `<think>…</think>` blocks, raise the token budget for models whose name contains "reason"/"think", and report
+"answer cut off: the model used all its tokens thinking" or "empty answer" instead of a generic error. Unit-tested (68 backend tests,
+88.5 %); not verified against the live NVIDIA service.
