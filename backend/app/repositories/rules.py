@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 from bson import ObjectId
@@ -11,7 +10,7 @@ from pymongo import ReturnDocument
 from app.errors import AppError, not_found
 from app.principal import Principal
 from app.repositories import audit
-from app.repositories.base import col, ensure_admin, now, paginate
+from app.repositories.base import col, ensure_admin, now, paginate, rx_escape
 
 _TRACKED = (
     "title",
@@ -61,7 +60,7 @@ async def list_rules(
     ensure_admin(admin)
     flt: dict[str, Any] = {}
     if q:
-        rx = {"$regex": re.escape(q), "$options": "i"}
+        rx = {"$regex": rx_escape(q), "$options": "i"}
         flt["$or"] = [{"code": rx}, {"title": rx}, {"reference": rx}]
     if category:
         flt["category"] = category

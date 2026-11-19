@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import re
 from datetime import datetime
 from typing import Any
 
 from bson import ObjectId
 
 from app.principal import Principal
-from app.repositories.base import col, ensure_admin, now, paginate
+from app.repositories.base import col, ensure_admin, now, paginate, rx_escape
 
 
 def _scrub(changes: dict[str, Any]) -> dict[str, Any]:
@@ -49,10 +48,10 @@ def _filter(
 ) -> dict[str, Any]:
     flt: dict[str, Any] = {}
     if q:
-        rx = {"$regex": re.escape(q), "$options": "i"}
+        rx = {"$regex": rx_escape(q), "$options": "i"}
         flt["$or"] = [{"actor_name": rx}, {"target_id": rx}, {"summary": rx}]
     if action:
-        flt["action"] = {"$regex": "^" + re.escape(action)}
+        flt["action"] = {"$regex": "^" + rx_escape(action)}
     if date_from or date_to:
         rng: dict[str, Any] = {}
         if date_from:

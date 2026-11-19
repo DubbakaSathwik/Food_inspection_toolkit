@@ -140,3 +140,30 @@ async def test_profile_update(inspector: User) -> None:
         "/api/v1/me", json={"designation": "Food Safety Officer", "office": "Nashik"}
     )
     assert r.status_code == 200 and r.json()["office"] == "Nashik"
+
+
+def test_production_refuses_to_start_without_firebase_credentials() -> None:
+    """SEC-004: a production server with no service account must fail at startup, not 500 on every request."""
+    import os
+    import subprocess
+    import sys
+
+    env = {k: v for k, v in os.environ.items() if k != "GOOGLE_APPLICATION_CREDENTIALS"}
+    # blank (not removed) so a developer's backend/.env cannot re-introduce the emulator host
+    env.update(
+        {
+            "APP_ENV": "production",
+            "FIREBASE_PROJECT_ID": "x",
+            "FIREBASE_SERVICE_ACCOUNT_JSON": "",
+            "FIREBASE_AUTH_EMULATOR_HOST": "",
+        }
+    )
+    out = subprocess.run(
+        [sys.executable, "-c", "from app.auth import init_firebase; init_firebase()"],
+        cwd=os.path.join(os.path.dirname(__file__), ".."),
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert out.returncode != 0
+    assert "FIREBASE_SERVICE_ACCOUNT_JSON is required" in out.stderr, out.stderr[-300:]

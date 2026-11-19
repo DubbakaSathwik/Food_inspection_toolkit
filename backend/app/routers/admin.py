@@ -448,8 +448,8 @@ async def diagnostics_list(p: Admin) -> list[dict[str, str]]:
 
 
 @router.post("/diagnostics/{check_id}", response_model=DiagnosticOut)
-async def diagnostics_run(p: Admin, check_id: str) -> dict[str, Any]:
-    res = await diagnostics.run_check(check_id)
+async def diagnostics_run(request: Request, p: Admin, check_id: str) -> dict[str, Any]:
+    res = await diagnostics.run_check(check_id, request)
     if res is None:
         raise not_found("Check")
     return res

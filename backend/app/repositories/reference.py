@@ -11,7 +11,7 @@ from pymongo import ReturnDocument
 from app.errors import AppError, forbidden, not_found
 from app.principal import Principal
 from app.repositories import audit
-from app.repositories.base import col, ensure_admin, next_sequence, now, paginate
+from app.repositories.base import col, ensure_admin, next_sequence, now, paginate, rx_escape
 
 
 async def _new_id() -> str:
@@ -183,7 +183,7 @@ def _filter(q: str | None, category: str | None, status: str) -> dict[str, Any]:
     if category:
         flt["category"] = category
     if q:
-        rx = {"$regex": re.escape(q), "$options": "i"}
+        rx = {"$regex": rx_escape(q), "$options": "i"}
         flt["$or"] = [
             {"product_name": rx},
             {"brand": rx},
@@ -227,8 +227,8 @@ async def candidates(
         if text:
             words = [w for w in re.findall(r"[A-Za-z0-9]{3,}", text)][:4]
             for w in words:
-                ors.append({"brand": {"$regex": re.escape(w), "$options": "i"}})
-                ors.append({"product_name": {"$regex": re.escape(w), "$options": "i"}})
+                ors.append({"brand": {"$regex": rx_escape(w), "$options": "i"}})
+                ors.append({"product_name": {"$regex": rx_escape(w), "$options": "i"}})
     if not ors:
         return []
     cur = col("reference_records").find({"status": "active", "$or": ors}).limit(limit)

@@ -145,7 +145,7 @@ export default function AskAIPage() {
                     <div className="mt-2 pt-2 border-t border-line flex flex-col gap-1" style={{ fontSize: 12.5 }}>
                       <strong>Sources (web research — not an official finding)</strong>
                       {m.sources.map((s) => (
-                        <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer nofollow">
+                        <a key={s.url} href={/^https?:\/\//i.test(s.url) ? s.url : "#"} target="_blank" rel="noopener noreferrer nofollow">
                           {s.title}
                         </a>
                       ))}

@@ -172,6 +172,48 @@ async def check_ocr() -> Result:
     )
 
 
+def check_network(request: Any) -> Result:
+    """Shows which address the rate limiter attributes to the admin's own request, so TRUSTED_PROXY_HOPS can be verified."""
+    s = get_settings()
+    peer = request.client.host if request.client else "unknown"
+    xff = request.headers.get("x-forwarded-for", "")
+    parts = [p.strip() for p in xff.split(",") if p.strip()]
+    chosen = (
+        parts[-s.trusted_proxy_hops]
+        if s.trusted_proxy_hops and len(parts) >= s.trusted_proxy_hops
+        else peer
+    )
+    detail = (
+        f"Connection from {peer}; X-Forwarded-For: {xff or 'none'}; "
+        f"rate limits treat this request as {chosen} (TRUSTED_PROXY_HOPS={s.trusted_proxy_hops})."
+    )
+    if s.is_production and s.trusted_proxy_hops and chosen == peer:
+        return _r(
+            "warn",
+            detail,
+            [
+                "TRUSTED_PROXY_HOPS is set but the header was not found; check the number of proxies."
+            ],
+        )
+    if s.is_production and not s.trusted_proxy_hops and xff:
+        return _r(
+            "warn",
+            detail + " All users behind the proxy share one limit.",
+            ["Set TRUSTED_PROXY_HOPS=1 on Render so each client gets its own limit."],
+        )
+    if (
+        s.is_production
+        and s.trusted_proxy_hops
+        and chosen != str(request.client.host if request.client else "")
+    ):
+        return _r(
+            "ok",
+            detail
+            + " It should be YOUR public IP address; if it is a Render/Cloudflare address, raise TRUSTED_PROXY_HOPS.",
+        )
+    return _r("ok", detail)
+
+
 CHECKS: list[tuple[str, str, str, Callable[[], Awaitable[Result]]]] = [
     ("config", "Configuration", "Environment values the server loaded", check_config),
     (
@@ -200,6 +242,12 @@ CHECKS: list[tuple[str, str, str, Callable[[], Awaitable[Result]]]] = [
         "Live test call to Hugging Face",
         _provider_check("huggingface"),
     ),
+    (
+        "network",
+        "Client address (rate limits)",
+        "Which address the rate limiter sees for your request",
+        check_config,
+    ),
     ("ocr", "OCR fallback", "Optional offline text reader", check_ocr),
 ]
 
@@ -208,12 +256,14 @@ def catalogue() -> list[dict[str, str]]:
     return [{"id": i, "title": t, "description": d} for i, t, d, _ in CHECKS]
 
 
-async def run_check(check_id: str) -> Result | None:
+async def run_check(check_id: str, request: Any = None) -> Result | None:
     for i, title, _, fn in CHECKS:
         if i == check_id:
             started = time.monotonic()
             try:
-                res = await fn()
+                res = (
+                    check_network(request) if i == "network" and request is not None else await fn()
+                )
             except Exception as e:  # a broken check must not break the page
                 log.exception("diagnostic %s crashed", i)
                 res = _r("fail", safe_error(e))

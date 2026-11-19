@@ -303,3 +303,36 @@ async def test_expired_photo_cleanup(inspector: User, client: httpx.AsyncClient)
     assert (
         await inspector.get(f"/api/v1/inspections/{iid}/photos/{d['photos'][0]['id']}")
     ).status_code == 404
+
+
+async def test_pixel_bomb_is_rejected_before_decoding(inspector: User) -> None:
+    """SEC-001: a tiny PNG that expands to ~64 megapixels must be refused with 413, not decoded."""
+    import io as _io
+
+    from PIL import Image
+
+    iid = await _new(inspector)
+    buf = _io.BytesIO()
+    Image.new("L", (8000, 8000)).save(buf, "PNG", optimize=True)
+    assert len(buf.getvalue()) < 1_000_000
+    r = await inspector.post(
+        f"/api/v1/inspections/{iid}/photos",
+        files={"file": ("bomb.png", buf.getvalue(), "image/png")},
+        data={"label": "front"},
+    )
+    assert r.status_code == 413 and r.json()["error"]["code"] == "image_too_large", r.text
+
+
+async def test_nul_byte_in_search_text_is_not_a_database_error(
+    inspector: User, admin: User
+) -> None:
+    """SEC-002: `?q=%00` used to make MongoDB reject the regex and answer 503 to any signed-in user."""
+    assert (await inspector.get("/api/v1/inspections", params={"q": "a\x00b"})).status_code == 200
+    for url in (
+        "/api/v1/admin/users",
+        "/api/v1/admin/reference",
+        "/api/v1/admin/rules",
+        "/api/v1/admin/audit",
+    ):
+        r = await admin.get(url, params={"q": "\x00"})
+        assert r.status_code == 200, (url, r.status_code)
