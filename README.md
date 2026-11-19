@@ -52,6 +52,9 @@ cd frontend && pnpm test && pnpm exec playwright test
 
 Playwright needs the local stack running. CI runs all of this plus security scans on every push (`.github/workflows/ci.yml`).
 
+**Something not working?** Sign in as an admin and open **Admin → Diagnostics**: it tests the database, Firebase sign-in
+and each AI provider with a live call and shows the real error.
+
 ## Documentation
 
 | Document | What it covers |

@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 
 from app.config import get_settings
-from app.services.ai.base import ChatResult, ProviderError, parse_json
+from app.services.ai.base import ChatResult, ProviderError, http_error, parse_json
 from app.services.images import ImageInput, fit_to_limit
 
 
@@ -52,7 +52,7 @@ class GeminiProvider:
         except httpx.HTTPError as e:
             raise ProviderError(f"network error ({type(e).__name__})") from e
         if r.status_code != 200:
-            raise ProviderError(f"HTTP {r.status_code}")
+            raise http_error(r)
         data: dict[str, Any] = r.json()
         if not data.get("candidates"):
             raise ProviderError("no candidates (blocked or empty)")

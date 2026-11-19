@@ -177,3 +177,13 @@ Python settings and are documented as manual fallback in `docs/DEPLOYMENT.md` §
 ### New tests
 `tests/test_ratelimit.py` (limit parsing, buckets, 429 format), `test_health.py` (HEAD, NoSQL operator objects rejected /
 treated as literal text), e2e `j7-analytics-audit.spec.ts`.
+
+## Post-handoff addition — Admin diagnostics page (2026-11-19)
+Requested by the owner after local testing with real keys failed with opaque errors ("HTTP 503/410/403").
+- New page **Admin → Diagnostics** (`/admin/diagnostics`) and endpoints `GET /api/v1/admin/diagnostics`,
+  `POST /api/v1/admin/diagnostics/{check}`: configuration sanity (placeholders, example admin email, CORS), MongoDB, GridFS,
+  Firebase service account (live call), a live test call to each configured AI provider (Gemini, NVIDIA, Hugging Face) and OCR.
+  Each result shows status, the real reason and fix hints; no keys, passwords or URIs are ever returned. Admin-only.
+- Provider errors now include the provider's own reason (e.g. `HTTP 403 — API key not valid`) via `http_error()`.
+- Tests: `test_diagnostics_admin_only_and_secret_free` (65 backend tests, 88.6 %), e2e `diagnostics` journey (desktop + mobile;
+  j7 + screens 16/16 passed). Real-provider results themselves are not verifiable from the build environment.

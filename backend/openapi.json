@@ -727,6 +727,76 @@
     "title": "DecisionIn",
     "type": "object"
    },
+   "DiagnosticInfo": {
+    "properties": {
+     "description": {
+      "title": "Description",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "title",
+     "description"
+    ],
+    "title": "DiagnosticInfo",
+    "type": "object"
+   },
+   "DiagnosticOut": {
+    "properties": {
+     "detail": {
+      "title": "Detail",
+      "type": "string"
+     },
+     "hints": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Hints",
+      "type": "array"
+     },
+     "id": {
+      "title": "Id",
+      "type": "string"
+     },
+     "ms": {
+      "title": "Ms",
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "ok",
+       "warn",
+       "fail",
+       "skip"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "title",
+     "status",
+     "detail",
+     "ms"
+    ],
+    "title": "DiagnosticOut",
+    "type": "object"
+   },
    "ExtractionAttempt": {
     "properties": {
      "at": {
@@ -4475,6 +4545,73 @@
      }
     },
     "summary": "Dashboard",
+    "tags": [
+     "admin"
+    ]
+   }
+  },
+  "/api/v1/admin/diagnostics": {
+   "get": {
+    "operationId": "diagnostics_list_api_v1_admin_diagnostics_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/DiagnosticInfo"
+         },
+         "title": "Response Diagnostics List Api V1 Admin Diagnostics Get",
+         "type": "array"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Diagnostics List",
+    "tags": [
+     "admin"
+    ]
+   }
+  },
+  "/api/v1/admin/diagnostics/{check_id}": {
+   "post": {
+    "operationId": "diagnostics_run_api_v1_admin_diagnostics__check_id__post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "check_id",
+      "required": true,
+      "schema": {
+       "title": "Check Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DiagnosticOut"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Diagnostics Run",
     "tags": [
      "admin"
     ]

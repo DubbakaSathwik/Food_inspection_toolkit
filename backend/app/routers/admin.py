@@ -16,6 +16,8 @@ from app.models.admin import (
     AdminDashboardOut,
     AnalyticsOut,
     AuditOut,
+    DiagnosticInfo,
+    DiagnosticOut,
     RuleIn,
     RuleOut,
     RulePatch,
@@ -41,7 +43,7 @@ from app.repositories import inspections as insp_repo
 from app.repositories import settings as settings_repo
 from app.repositories.settings import IMAGE_KEYS
 from app.routers.proposals import to_out as proposal_out
-from app.services import images, maintenance
+from app.services import diagnostics, images, maintenance
 from app.services.ai import chain, ocr
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -435,3 +437,19 @@ async def storage_cleanup(p: Admin) -> dict[str, int]:
 
 
 _ = (Category, get_settings)  # re-exported types used in annotations elsewhere
+
+
+# ---------------------------------------------------------------- diagnostics
+
+
+@router.get("/diagnostics", response_model=list[DiagnosticInfo])
+async def diagnostics_list(p: Admin) -> list[dict[str, str]]:
+    return diagnostics.catalogue()
+
+
+@router.post("/diagnostics/{check_id}", response_model=DiagnosticOut)
+async def diagnostics_run(p: Admin, check_id: str) -> dict[str, Any]:
+    res = await diagnostics.run_check(check_id)
+    if res is None:
+        raise not_found("Check")
+    return res
