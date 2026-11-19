@@ -30,8 +30,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let profile = await api<Me>("/api/v1/me");
       if (profile.claims_stale) {
-        await u.getIdToken(true); // pick up the role/active claims the server just set
-        profile = await api<Me>("/api/v1/me");
+        try {
+          await u.getIdToken(true); // pick up the role/active claims the server just set
+          profile = await api<Me>("/api/v1/me");
+        } catch (refreshError) {
+          // A disabled account has its refresh tokens revoked, so the forced refresh fails. Keep the (non-active)
+          // profile so the guards show the "account disabled" screen instead of an endless access check.
+          if (profile.status === "active") throw refreshError;
+        }
       }
       setMe(profile);
       setError(null);
@@ -63,7 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () =>
       onAuthProblem((code) => {
         const u = getFirebaseAuth()?.currentUser;
-        if (code.startsWith("account_") && u) void loadMe(u);
+        // A role change or deactivation in another session: reload the profile so the guards re-route.
+        if ((code.startsWith("account_") || code === "forbidden") && u) void loadMe(u);
       }),
     [loadMe],
   );

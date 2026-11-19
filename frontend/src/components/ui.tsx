@@ -294,7 +294,7 @@ export function Metric({
   );
 }
 
-export function DemoNote({ children = "Sample values for design preview" }: { children?: ReactNode }) {
+export function DemoNote({ children = "Demonstration data — fictional records" }: { children?: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5" style={{ fontSize: 12.5, fontWeight: 600, color: "#686B60" }}>
       <Icon name="info" size={14} />
@@ -478,6 +478,12 @@ export function Modal({
   wide?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Only user-initiated closes (Escape) report back; a programmatic close (open → false) must not call onClose,
+  // or switching from one dialog to another would immediately close the new one.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -487,7 +493,9 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      onClose={onClose}
+      onClose={() => {
+        if (openRef.current) onClose();
+      }}
       aria-label={title}
       className="m-auto rounded-[14px] border border-line p-0 backdrop:bg-[rgba(32,35,29,.35)]"
       style={{ width: wide ? "min(760px, calc(100vw - 32px))" : "min(520px, calc(100vw - 32px))", maxHeight: "calc(100vh - 48px)" }}

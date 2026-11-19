@@ -84,3 +84,46 @@ validated chart colours). Values differ from the design because the screens show
 | `apis.google.com` | Unreachable from the sandbox; Firebase preloads it on mobile user agents. Filtered in the sweep (environment limit). |
 | Full user journeys (create → report, admin approve proposal…) through the UI | Phase 3 (the screens call the real endpoints; the sweep only renders them). |
 | Netlify deploy, CSP in a real browser | Phase 4. |
+
+## Phase 3 — Integration and end-to-end journeys (2026-11-19)
+
+**Environment:** `scripts/local-stack.sh --fresh` → MongoDB 7 (Docker), Firebase Auth emulator, FastAPI with the fake AI provider
+(`AI_PROVIDER_ORDER=fake`), Next.js **production** build on :3000. Browsers: Chromium 1440×900 ("desktop") and iPhone 14 profile 390
+("mobile"). Every journey creates its own uniquely named users and data through the real UI (fixtures: `frontend/e2e/fixtures/*.png`).
+
+| Check | Command | Result |
+|-------|---------|--------|
+| End-to-end journeys + screen sweep | `cd frontend && pnpm exec playwright test` | ✅ **36 passed**, 2 skipped (API-level security checks run once, on desktop) — 3.3 min |
+| Repeat of the previously failing disable journey | `--repeat-each 3` (desktop + mobile) | ✅ 6/6 |
+| Frontend static + unit | `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` | ✅ clean · 9 Vitest passed |
+| Backend | `uv run ruff check`, `ruff format --check`, `mypy`, `bandit`, `pytest --cov=app` | ✅ clean · 0 bandit issues · 60 passed, 89 % coverage |
+
+### Journeys (all passed on desktop and mobile)
+Accounts (pending → approval in the admin UI → access with claims refresh; disable in an open session; admin demotion in an open session) ·
+full inspection (3 photos incl. blurry warning, crop, AI reading, correction with original AI value kept, confirm all, AI review, finding
+decisions with reasons, classification, remarks, report, PDF download `%PDF` > 20 KB, follow-up note, history filter, CSV + Excel export,
+another inspector gets "Inspection not found" on findings/report/verify URLs) · AI outage → incomplete → dashboard badge → change photo →
+retry → fields · proposal submit → info request → reply → approve → new demo reference record visible in the reference database · reference
+manual entry with server-side licence validation shown in the form, packaging version + photo, archive/restore, record history · AI-assisted
+draft (not saved) · CSV import preview (1 valid, 1 invalid) and commit · compliance rule create/edit → v2 in history · website hero image
+upload visible to an anonymous visitor on `/`, then reset · Ask AI without web (no sources) and with web research (sources), history kept
+after reload · cold start: API unreachable → "Starting the server…" → recovers and loads data · direct API calls: no/forged token 401,
+other owner 404, inspector on admin APIs 403, role escalation 422, pending account 403, audit log DELETE 405 · `.next/static` contains no
+connection strings, keys or seeded emails.
+
+### Defects found and fixed in Phase 3 (each with a regression check)
+| # | Defect | Fix | Regression check |
+|---|--------|-----|------------------|
+| 1 | Choosing an option in the "Add Product" menu closed the newly opened dialog (programmatic `<dialog>.close()` fired `onClose`). | `Modal` reports only user-initiated closes (T-34). | Vitest "Modal … dialog switching regression" (fails without the fix) + `j4-admin` |
+| 2 | A demoted admin stayed in the admin area with failing pages until reload. | Client reloads `/me` on `403 forbidden` (T-33). | `j1-accounts` demotion journey |
+| 3 | A disabled user in an open session was stuck on "Checking your access…" (forced token refresh refused after revocation). | Keep the non-active profile when the refresh fails (T-37). | `j1-accounts` disable journey (×3 per viewport) |
+| 4 | Backend test setup wiped all emulator accounts, breaking a shared dev stack. | Removed the global wipe (T-35). | Backend suite + e2e run back to back |
+| 5 | `dev_seed.py` kept a token from before the bootstrap role claim existed (401 on a fresh emulator). | Re-issue the token when `/me` reports `claims_stale`. | `local-stack.sh --fresh` |
+
+### Audit
+No `TODO`/`FIXME`/mock markers in `frontend/src` or `backend/app`; every `<Button>` has a handler or is a submit/disabled state; the only
+illustrative content is labelled ("Sample preview" on the landing page, pack illustration only when a photo is unavailable).
+
+### Not verified in Phase 3
+Real Google sign-in popup/redirect and real Firebase project · real AI providers (no keys) · PaddleOCR · rate limits (disabled in tests) ·
+Analytics/Audit filters clicked through the UI (rendered with live data; audit export covered by backend tests) · deployment (Phase 4).

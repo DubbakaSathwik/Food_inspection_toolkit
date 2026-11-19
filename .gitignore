@@ -20,3 +20,4 @@ test-results/
 .mypy_cache/
 firebase-debug.log
 *-debug.log
+.local-logs/

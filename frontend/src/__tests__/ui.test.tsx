@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Stepper } from "@/components/inspection";
 import { REPORT_SECTIONS, ReportDocument } from "@/components/report";
 import { Chip, label } from "@/components/ui";
@@ -61,5 +61,31 @@ describe("ReportDocument", () => {
     const headings = screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
     expect(headings).toEqual(REPORT_SECTIONS.map((s, i) => `${i + 1}. ${s}`));
     expect(screen.getByText(/not a certified digital signature/)).toBeInTheDocument();
+  });
+});
+
+describe("Modal", () => {
+  it("does not report a programmatic close as a user close (dialog switching regression)", async () => {
+    const { Modal } = await import("@/components/ui");
+    const onClose = vi.fn();
+    const proto = HTMLDialogElement.prototype as unknown as { showModal: () => void; close: () => void };
+    proto.showModal ??= function (this: HTMLDialogElement) {
+      this.setAttribute("open", "");
+    };
+    proto.close ??= function (this: HTMLDialogElement) {
+      this.removeAttribute("open");
+      this.dispatchEvent(new Event("close"));
+    };
+    const { rerender } = render(
+      <Modal open title="Menu" onClose={onClose}>
+        x
+      </Modal>,
+    );
+    rerender(
+      <Modal open={false} title="Menu" onClose={onClose}>
+        x
+      </Modal>,
+    );
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

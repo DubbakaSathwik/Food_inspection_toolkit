@@ -133,7 +133,7 @@ async function raise(r: Response): Promise<never> {
   } catch {
     /* non-JSON error body */
   }
-  if (r.status === 401 || code.startsWith("account_")) authListeners.forEach((l) => l(code));
+  if (r.status === 401 || code.startsWith("account_") || code === "forbidden") authListeners.forEach((l) => l(code));
   throw new ApiError(r.status, code, message, fields);
 }
 

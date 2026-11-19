@@ -44,6 +44,9 @@ FAKE_FIELDS: dict[str, tuple[str | None, float, int | None]] = {
 }
 
 
+FAIL_MARKER = b"CRATESCAN_FAKE_FAIL"
+
+
 class FakeProvider:
     supports_web = True
 
@@ -60,6 +63,10 @@ class FakeProvider:
 
     async def extract(self, images: list[ImageInput], prompt: str) -> dict[str, Any]:
         self._maybe_fail()
+        # Test hook (fake provider only): a photo carrying this marker simulates a provider outage,
+        # so end-to-end tests can drive the "incomplete → retry" path through the real UI.
+        if any(FAIL_MARKER in img.data for img in images):
+            raise ProviderError("simulated provider failure (test marker)")
         n = len(images)
         fields = {
             k: {

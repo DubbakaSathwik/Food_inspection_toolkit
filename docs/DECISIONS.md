@@ -76,3 +76,14 @@ the deploy configuration, CI workflows and `DEPLOYMENT.md` together.
 | T-29 | `netlify.toml` CSP allows `'unsafe-inline'` scripts/styles (Next.js bootstrap + design inline styles, no nonce pipeline yet), `connect-src` to `*.onrender.com` and Firebase Auth endpoints. | Tighten with nonces later if required. |
 | T-30 | E2E tests sign in through the Auth emulator with a test-only `window.__csTestSignIn` helper that exists **only** when `NEXT_PUBLIC_USE_AUTH_EMULATOR=true`. | Real Google popups cannot be automated; production builds never expose the helper. |
 | T-31 | Backend: `FIREBASE_AUTH_EMULATOR_HOST` is now a setting that is copied into the process environment (refused in production); `InspectionOut` exposes `analysis_stale`; `scripts/dev_seed.py` creates local demo data through the real API. | Found while wiring the frontend. |
+
+## Phase 3 integration decisions (2026-11-19)
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| T-32 | Fake provider test hook: a photo containing the bytes `CRATESCAN_FAKE_FAIL` makes the **fake** provider fail (dev/test only; the fake provider is refused in production). | Lets the UI journey drive "AI outage → incomplete → retry" without restarting the backend. |
+| T-33 | Any `403 forbidden` API answer (as well as `account_*` and 401) makes the client reload `/me`, so the route guards move a demoted admin out of the admin area in an open session. | Found by the role-demotion journey. |
+| T-34 | `Modal` reports only user-initiated closes; a programmatic close no longer calls `onClose`. | Bug found by the admin journey: switching from the "Add Product" menu to a sub-dialog closed the new dialog immediately. Regression test added. |
+| T-35 | Backend test setup no longer wipes all Auth-emulator accounts (it broke the shared local dev stack); test users use unique emails and the test DB is dropped. | Found while running backend tests next to the e2e stack. |
+| T-36 | `scripts/local-stack.sh [--fresh]` starts MongoDB, the Auth emulator, the API (fake AI) and the frontend build for development and e2e. | Repeatable local integration environment. |
+| T-37 | When the forced token refresh after a `claims_stale` answer fails (refresh tokens revoked on disable), the auth context keeps the non-active profile so the "account disabled" screen shows; after a full reload Firebase signs the revoked session out and signing in again shows the same screen. | Bug found by the disable journey on mobile: the user was stuck on "Checking your access…". |
