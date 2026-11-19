@@ -38,7 +38,7 @@ scripts/local-stack.sh --fresh
 
 Open http://localhost:3000. Demo accounts (emulator): `admin@example.com` (Super Admin), `inspector@example.com`,
 `pending.person@example.com`. With real keys instead, put your Atlas/Firebase/AI values in the two env files (see comments
-inside them) and run the backend with `uv run uvicorn app.main:app --reload` and the frontend with `pnpm dev`.
+inside them) and run the backend with `uv run python -m uvicorn app.main:app --reload --port 8000` and the frontend with `pnpm dev`.
 
 ## Tests
 
@@ -65,3 +65,10 @@ Playwright needs the local stack running. CI runs all of this plus security scan
 | `docs/DECISIONS.md` | Every technical and owner decision with reasons |
 | `docs/handoffs/` | Phase-by-phase handoff notes |
 | `docs/source-documents/` | Original ideation, features, MVP and PRD PDFs |
+
+### Windows notes
+- If Windows reports *"An Application Control policy has blocked this file (os error 4551)"*, Smart App Control is blocking an
+  unsigned launcher in `backend\.venv\Scripts\`. Run tools through Python instead: `uv run python -m uvicorn …`,
+  `uv run python -m pytest`.
+- `scripts/local-stack.sh` needs Git Bash or WSL; in PowerShell start the emulator, API and frontend in separate terminals.
+- Keep the Firebase emulator terminal open while you use the app; a "port taken" error means an earlier emulator is still running.

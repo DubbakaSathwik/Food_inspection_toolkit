@@ -9,7 +9,7 @@ cp .env.example .env            # then edit values (keys stay on the server only
 uv sync                         # add --extra ocr to install PaddleOCR (needs ~1 GB RAM)
 docker run -d --name cs-mongo -p 27017:27017 mongo:7
 uv run python -m scripts.migrate
-uv run uvicorn app.main:app --reload --port 8000
+uv run python -m uvicorn app.main:app --reload --port 8000
 ```
 Without real Firebase credentials, use the Auth emulator: `firebase emulators:start --only auth --project demo-cratescan`
 (from the repo root) and set `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`, `FIREBASE_PROJECT_ID=demo-cratescan`.
