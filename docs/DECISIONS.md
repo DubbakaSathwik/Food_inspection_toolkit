@@ -46,3 +46,19 @@ the deploy configuration, CI workflows and `DEPLOYMENT.md` together.
 | T-09 | Per-inspector daily AI quota (`AI_DAILY_LIMIT_PER_USER`, default 60 calls) tracked in `usage_metrics`, plus HTTP rate limits (slowapi). | MVP: controlled API limits; no silent paid usage. |
 | T-10 | No keep-alive pings to Render; the frontend wakes the backend via `/health` and shows a "Starting server" state. | Master prompt §12 rule on keep-alive pings. |
 | T-11 | Playwright pinned to 1.63.0 locally to match the pre-installed browser; CI installs browsers for the same version. | Environment constraint. |
+
+## Phase 1 implementation decisions (2026-11-19)
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| T-12 | Extraction schema has **22 fields in 7 groups**, exactly as in `design/source/VerifyFields.dc.html` (handoff prompt said "24"; the design is authoritative). | Design is the source for field labels. |
+| T-13 | Auto-confirm = confidence ≥ threshold (default 0.85, admin setting) **and** the value passes validation. Analysis is blocked until every remaining field is confirmed or edited (BR-01). | Human review before findings. |
+| T-14 | Editing a field after analysis sets `analysis_stale`; decision/report are blocked until the AI review is re-run. Completed inspections are immutable (only follow-up notes). | Report must reflect reviewed data. |
+| T-15 | Admin pre-authorisation uses a separate `user_invites` collection (email → role); applied only to a **verified** Google email on first sign-in. | Keeps `users` keyed by Firebase UID. |
+| T-16 | Custom claims are synced server-side by `/me` and admin actions. A role/status mismatch between token and DB returns 401 `claims_stale`; the client force-refreshes the token. Disable also revokes refresh tokens. | Immediate demotion/disable without trusting stale tokens. |
+| T-17 | Admin/super-admin role grants and changes to admin accounts require Super Admin; nobody can change their own role/status; the last active Super Admin cannot be demoted/disabled. | Lock-out and escalation safety. |
+| T-18 | Packaging comparison uses the newest reference packaging version with photos (max 2 images) against the inspector's "front" photo(s); provider failure → "not performed" (never blocks). | Observations only (BR-03). |
+| T-19 | Reference-image downloads are allowed for any active user (inspectors see them in findings); inspection photos and reports only for their owner; site images are public. | Least privilege per file type. |
+| T-20 | Opportunistic retention cleanup (≤ once/hour, triggered on inspection create) plus `scripts/cleanup.py` and an admin button — Render free has no cron. | No paid scheduler. |
+| T-21 | Repository admin checks use `ensure_admin()` (raises 403) instead of `assert`, so they survive `python -O`. | Bandit B101 finding. |
+| T-22 | Rate limiting is disabled when `APP_ENV=test` so the suite is deterministic; production/dev limits come from env. | Test stability; limits verified manually in Phase 4. |
