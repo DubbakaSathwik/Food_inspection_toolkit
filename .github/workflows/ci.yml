@@ -1,9 +1,9 @@
 # CRATE-SCAN CI/CD (master prompt §11, owner decision F1: auto-deploy from main after CI passes).
 # quality → tests → security/codeql → build → deploy (main only) → smoke.
-# Required GitHub secrets for deploy (Settings → Secrets and variables → Actions, environment "production"):
-#   RENDER_DEPLOY_HOOK_URL, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID
-# Required repository/environment variables: API_BASE_URL (Render URL), SITE_URL (Netlify URL),
-#   NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, NEXT_PUBLIC_FIREBASE_PROJECT_ID, NEXT_PUBLIC_FIREBASE_APP_ID
+# Deployment: Render deploys both services from `main` by itself once these checks pass (render.yaml:
+#   autoDeployTrigger: checksPass), so no deploy secrets are needed here. The final `release-check` job only
+#   waits for the new release to be live and tests it. It runs when the repository variables API_BASE_URL and
+#   SITE_URL are set (Settings → Secrets and variables → Actions → Variables). See docs/DEPLOYMENT.md.
 # See docs/DEPLOYMENT.md.
 name: CI
 
@@ -287,77 +287,44 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' "localhost:$PORT/docs")" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' "localhost:$PORT/api/v1/me")" = 401
 
-  deploy:
-    name: Deploy (Render backend → Netlify frontend)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  release-check:
+    name: Release check (wait for Render, then smoke test)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.API_BASE_URL != '' && vars.SITE_URL != ''
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    environment:
-      name: production
-      url: ${{ vars.SITE_URL }}
-    concurrency:
-      group: deploy-production
-      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Trigger Render deploy and wait for /health
+      - name: Wait until Render serves this commit
         env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
           API_BASE_URL: ${{ vars.API_BASE_URL }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          SHA: ${{ github.sha }}
         run: |
-          test -n "$RENDER_DEPLOY_HOOK_URL" && test -n "$API_BASE_URL" || { echo "::error::Set RENDER_DEPLOY_HOOK_URL secret and API_BASE_URL variable"; exit 1; }
-          curl -sf -X POST "$RENDER_DEPLOY_HOOK_URL" > /dev/null
-          sleep 60
-          # Free instances cold-start; a build + start can take several minutes.
-          for _ in $(seq 1 60); do
-            if curl -sf --max-time 30 "$API_BASE_URL/health"; then echo; exit 0; fi
+          want="${SHA::7}"
+          # Free instances sleep and builds take minutes: allow up to ~20 minutes.
+          for _ in $(seq 1 80); do
+            api=$(curl -s --max-time 40 "$API_BASE_URL/health" || true)
+            if echo "$api" | grep -q "\"version\":\"$want\""; then echo "API is serving $want"; break; fi
             sleep 15
           done
-          echo "::error::Backend did not become healthy"; exit 1
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-        with:
-          package_json_file: frontend/package.json
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-      - name: Build and deploy frontend to Netlify
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ vars.API_BASE_URL }}
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          NEXT_PUBLIC_USE_AUTH_EMULATOR: "false"
-        run: |
-          (cd frontend && pnpm install --frozen-lockfile)
-          npx --yes netlify-cli@27.20.0 deploy --build --prod --no-build-cache --message "CI ${GITHUB_SHA::7}"
-          bash scripts/scan-bundle.sh frontend/.next
-
-  smoke:
-    name: Post-deploy smoke test
-    needs: deploy
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: Site, API health, CORS and security headers
+          echo "$api" | grep -q "\"version\":\"$want\"" || { echo "::error::API did not report version $want (last answer: $api)"; exit 1; }
+          for _ in $(seq 1 40); do
+            curl -sf --max-time 40 "$SITE_URL/" -o /dev/null && break
+            sleep 15
+          done
+      - name: Smoke test (site, API health, CORS, headers)
         env:
           SITE_URL: ${{ vars.SITE_URL }}
           API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: |
           set -e
-          curl -sf --max-time 30 "$SITE_URL/" -o /dev/null
+          curl -sf --max-time 60 "$SITE_URL/" -o /dev/null
           curl -sfI --max-time 30 "$SITE_URL/" | grep -i "x-frame-options: deny"
+          curl -sfI --max-time 30 "$SITE_URL/" | grep -i "content-security-policy"
           curl -sf --max-time 60 "$API_BASE_URL/health" | grep '"status":"ok"'
           curl -sf --max-time 30 "$API_BASE_URL/api/v1/public/site-images" -H "Origin: $SITE_URL" -D - -o /dev/null | grep -i "access-control-allow-origin: $SITE_URL"
           code=$(curl -s -o /dev/null -w '%{http_code}' "$API_BASE_URL/api/v1/me")
           test "$code" = "401" || { echo "::error::/api/v1/me without a token returned $code"; exit 1; }
           code=$(curl -s -o /dev/null -w '%{http_code}' "$API_BASE_URL/docs")
           test "$code" = "404" || { echo "::error::API docs are exposed in production ($code)"; exit 1; }
-          echo "Smoke test passed"
+          echo "Release check passed"

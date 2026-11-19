@@ -10,7 +10,7 @@ fields, compare them against reference records and rules, and generate an inspec
 | Backend | Python 3.12, FastAPI, Pydantic v2, PyMongo async + GridFS, Firebase Admin, ReportLab | `backend/` |
 | Database | MongoDB Atlas (documents + GridFS files) | — |
 | AI | Gemini → NVIDIA → Hugging Face (→ optional PaddleOCR) for label extraction and "Ask AI" | `backend/app/services/ai/` |
-| CI/CD | GitHub Actions → Render (API) + Netlify (site) | `.github/`, `render.yaml`, `netlify.toml` |
+| CI/CD | GitHub Actions → Render (API + website) | `.github/`, `render.yaml` |
 
 ## Run it locally (about 10 minutes)
 
@@ -59,7 +59,7 @@ and each AI provider with a live call and shows the real error.
 
 | Document | What it covers |
 |----------|----------------|
-| `docs/DEPLOYMENT.md` | Atlas, Firebase, Render, Netlify, GitHub setup, rollback, pre-launch checklist |
+| `docs/DEPLOYMENT.md` | Atlas, Firebase, Render setup, rollback, pre-launch checklist |
 | `SECURITY.md` | Security controls, Phase 4 review results, owner checklist |
 | `docs/TEST_REPORT.md` | What was tested and verified, per phase, and what was not |
 | `HANDOFF.md` | Final status and next steps for the owner |

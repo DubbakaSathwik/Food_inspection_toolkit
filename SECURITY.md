@@ -45,17 +45,17 @@ reproduce. Rotate any exposed key first (see "Secrets" below).
 1. **MongoDB Atlas:** create a database user with `readWrite` on the app database only (not Atlas admin); strong generated password.
    Network access: Render free instances have no fixed outbound IP, so `0.0.0.0/0` is needed on the free plan — this is why
    the strong password and TLS (default in `mongodb+srv`) matter. With a paid Render plan, use its static outbound IPs instead.
-2. **Firebase:** enable only the Google provider; add your Netlify domain to *Authorized domains*; remove `localhost` before launch
-   if you do not need it. In Google Cloud → APIs & Services → Credentials, restrict the browser API key to your Netlify domain
+2. **Firebase:** enable only the Google provider; add your website's Render address to *Authorized domains*; remove `localhost` before launch
+   if you do not need it. In Google Cloud → APIs & Services → Credentials, restrict the browser API key to your website's address
    (HTTP referrers) and to the Identity Toolkit / Token Service APIs.
 3. **Service account JSON:** store only in Render as `FIREBASE_SERVICE_ACCOUNT_JSON`. Never commit it.
 4. **AI keys:** store in Render only. Set spending limits / quotas in each provider's console.
 5. **GitHub:** protect `main` (require the CI checks, require PR review, block force-push); enable secret scanning + push
    protection and Dependabot alerts; keep deploy secrets in the `production` environment with required reviewers if wanted.
-6. **CORS:** set `CORS_ALLOWED_ORIGINS` to your exact Netlify URL(s) — no localhost in production.
+6. **CORS:** set `CORS_ALLOWED_ORIGINS` to your exact website URL (the `crate-scan-web` Render address) — no localhost in production.
 
 ## Secrets: if one leaks
-Rotate it at the provider first (Atlas password, Firebase service-account key, AI keys, Netlify token, Render deploy hook),
+Rotate it at the provider first (Atlas password, Firebase service-account key, AI keys, Render API keys),
 update the value in Render/GitHub, redeploy, then remove it from Git history if it was committed.
 
 ## Known limitations
