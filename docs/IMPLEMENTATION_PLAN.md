@@ -16,10 +16,10 @@ Status: ☐ not started · ◐ in progress · ☑ done (verified) · ⚠ blocked
 | T09 | 1 | REQ-040..042 | T08 | Proposals (inspector + admin review) | API tests | ☑ |
 | T10 | 1 | REQ-050..060 | T04 | Admin: dashboard, reference CRUD/images/AI entry/import, rules, users, analytics, audit, settings, storage | API + permission tests | ☑ |
 | T11 | 1 | REQ-070..071 | T06 | Assistant chat + web toggle | API tests with fake provider | ☑ |
-| T12 | 2 | NFR-01 | T00 | Next.js foundation, tokens, fonts, icons, components, shells, loader | build + lint | ☐ |
-| T13 | 2 | public/auth | T12 | Landing, SignIn, Pending | Playwright | ☐ |
-| T14 | 2 | inspector | T12 | Dashboard, New, Verify, AI Review, Findings, Report, History, Proposals, Ask AI, Profile | Playwright | ☐ |
-| T15 | 2 | admin | T12 | Admin dashboard, Reference DB, Product detail, Rules, Proposals, Users, Analytics, Audit, Settings | Playwright | ☐ |
+| T12 | 2 | NFR-01 | T00 | Next.js foundation, tokens, fonts, icons, components, shells, loader | build + lint | ☑ |
+| T13 | 2 | public/auth | T12 | Landing, SignIn, Pending | Playwright | ☑ |
+| T14 | 2 | inspector | T12 | Dashboard, New, Verify, AI Review, Findings, Report, History, Proposals, Ask AI, Profile | Playwright | ☑ |
+| T15 | 2 | admin | T12 | Admin dashboard, Reference DB, Product detail, Rules, Proposals, Users, Analytics, Audit, Settings | Playwright | ☑ |
 | T16 | 3 | all | T11,T15 | Integration, cold-start, auth flow with emulator, e2e journeys | Playwright e2e desktop + mobile | ☐ |
 | T17 | 4 | — | T16 | CI workflows, Dependabot, scheduled security, actionlint | actionlint + local runs | ☐ |
 | T18 | 4 | — | T17 | Security review, bundle check, visual comparison vs screenshots | reports | ☐ |

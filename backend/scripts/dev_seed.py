@@ -78,7 +78,8 @@ def new_inspection(c: httpx.Client, photos: list[tuple[str, bool]]) -> str:
 
 def main() -> None:
     admin = client("admin@example.com", "Asha Admin")
-    admin.get("/api/v1/me").raise_for_status()
+    if admin.get("/api/v1/me").raise_for_status().json()["claims_stale"]:
+        admin = client("admin@example.com", "Asha Admin")  # fresh token carries the new role claim
     insp = client("inspector@example.com", "Ravi Inspector")
     me = insp.get("/api/v1/me").json()
     if me["status"] != "active":

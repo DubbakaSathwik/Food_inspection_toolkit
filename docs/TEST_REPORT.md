@@ -53,3 +53,34 @@ provider) · real Gemini / NVIDIA / Hugging Face **not called** (no keys).
 | Rate limiting (slowapi) | Disabled in `APP_ENV=test` (T-22); to be checked manually in Phase 4. |
 | Atlas production cluster | Not provisioned in this session; local MongoDB 7 used. |
 | Frontend, end-to-end, CI | Phases 2–4. |
+
+## Phase 2 — Frontend (2026-11-19)
+
+**Environment:** Node 22.23 · pnpm 10.28 · Next.js 16.4.6 (production build served with `next start`) · React 19.3 · Tailwind 4.3 ·
+Playwright 1.63 (Chromium) · backend from Phase 1 on :8000 with `AI_PROVIDER_ORDER=fake`, MongoDB 7 (Docker), Firebase Auth emulator ·
+data from `backend/scripts/dev_seed.py`. Re-run from a clean restart (services restarted, dev DB reset).
+
+| Check | Command (in `frontend/`) | Result |
+|-------|--------------------------|--------|
+| Types | `pnpm typecheck` (strict) | ✅ no errors |
+| Lint | `pnpm lint` (ESLint 9 + next config incl. React Hooks rules) | ✅ 0 errors, 0 warnings |
+| Format | `pnpm format:check` | ✅ all files formatted |
+| Unit/component tests | `pnpm test` (Vitest + Testing Library) | ✅ 8 passed (chips/labels, routing helper, stepper a11y, report 13-section order, API client: token header, `claims_stale` refresh+retry, error mapping, cold-start retry) |
+| Production build | `pnpm build` | ✅ 22 app routes + not-found + icon |
+| Screen sweep | `pnpm exec playwright test` | ✅ 10 passed — every route at 1440×900 and iPhone 14 (390): page renders, **no horizontal overflow**, **no console errors**; screenshots in `docs/screens/phase2/` |
+| Backend regression | `uv run pytest --cov=app` (backend) | ✅ 59 passed, 89 % coverage; ruff/mypy/bandit clean |
+
+### Visual comparison with `design/screenshots`
+Side-by-side comparisons were made for Main, InspectorDashboard, NewInspection, VerifyFields, AIReview, InspectionResults, ReportPreview,
+History, AskAI, AdminDashboard, ProductDetail, UserManagement, Analytics (desktop) and Main, AIReview, ReportPreview, InspectorDashboard
+(mobile). Layout, tokens, typography, components and the ≤760 px mobile shell match. **Not pixel-perfect**; known, intentional
+differences are listed in `DECISIONS.md` T-24…T-28 (validation flags instead of OCR chips, no Privacy/Terms links, no history PDF export,
+validated chart colours). Values differ from the design because the screens show real API data, not the design's sample values.
+
+### Notes / not verified in Phase 2
+| Item | Status |
+|------|--------|
+| Real Google sign-in popup / redirect | Not testable here; emulator sign-in used (T-30). Verified in Phase 3/4 with a real Firebase project. |
+| `apis.google.com` | Unreachable from the sandbox; Firebase preloads it on mobile user agents. Filtered in the sweep (environment limit). |
+| Full user journeys (create → report, admin approve proposal…) through the UI | Phase 3 (the screens call the real endpoints; the sweep only renders them). |
+| Netlify deploy, CSP in a real browser | Phase 4. |

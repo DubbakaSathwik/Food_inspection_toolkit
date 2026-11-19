@@ -62,3 +62,17 @@ the deploy configuration, CI workflows and `DEPLOYMENT.md` together.
 | T-20 | Opportunistic retention cleanup (≤ once/hour, triggered on inspection create) plus `scripts/cleanup.py` and an admin button — Render free has no cron. | No paid scheduler. |
 | T-21 | Repository admin checks use `ensure_admin()` (raises 403) instead of `assert`, so they survive `python -O`. | Bandit B101 finding. |
 | T-22 | Rate limiting is disabled when `APP_ENV=test` so the suite is deterministic; production/dev limits come from env. | Test stability; limits verified manually in Phase 4. |
+
+## Phase 2 implementation decisions (2026-11-19)
+
+| ID | Decision | Reason |
+|----|----------|--------|
+| T-23 | Next.js 16 `cacheComponents` / partial prefetching are **off**. App pages are client components; auth is the Firebase ID token in the browser (no session cookies to read on the server). | Cache Components would force Suspense boundaries around every session read for no benefit here. |
+| T-24 | Verify Fields shows **validation flags** ("Looks unusual", "Not found") instead of the design's "OCR agrees / differs" chips. | The backend does not run a per-field OCR cross-check; showing agreement would be invented data. |
+| T-25 | Landing footer omits the design's "Privacy" and "Terms" links (no such pages exist); sign-in copy says "authorised inspection work only". | No dead links. Owner to supply policy pages if needed. |
+| T-26 | History page: "Export PDF" from the design is not offered (CSV and Excel are). Follow-up notes are read/added on each completed inspection's report page. | No API for a cross-inspection notes list or a history PDF; avoids fake buttons. |
+| T-27 | Classification chart colours: Verified `#4E7A2A`, Not verified `#5F7C99`, Suspicious `#C07A1A` (validated with the dataviz palette script: CVD ΔE 14.2, normal-vision ΔE 16.0, contrast ≥ 3:1; the neutral slot is intentionally low-chroma and always carries a text label + %). Single-series charts use `#56703A`; every chart has hover tooltips or a table view. | The design's olive trio failed the colour-separation checks. |
+| T-28 | Admin "More" tab opens Settings, which on mobile lists links to Compliance Rules, Proposals and Audit Logs (handoff: "More → Settings"). Settings also has a "My account" tab for admins. | Every admin page reachable on mobile. |
+| T-29 | `netlify.toml` CSP allows `'unsafe-inline'` scripts/styles (Next.js bootstrap + design inline styles, no nonce pipeline yet), `connect-src` to `*.onrender.com` and Firebase Auth endpoints. | Tighten with nonces later if required. |
+| T-30 | E2E tests sign in through the Auth emulator with a test-only `window.__csTestSignIn` helper that exists **only** when `NEXT_PUBLIC_USE_AUTH_EMULATOR=true`. | Real Google popups cannot be automated; production builds never expose the helper. |
+| T-31 | Backend: `FIREBASE_AUTH_EMULATOR_HOST` is now a setting that is copied into the process environment (refused in production); `InspectionOut` exposes `analysis_stale`; `scripts/dev_seed.py` creates local demo data through the real API. | Found while wiring the frontend. |
