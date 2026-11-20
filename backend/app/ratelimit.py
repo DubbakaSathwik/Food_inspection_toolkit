@@ -35,10 +35,17 @@ class Rule:
 
 class RateLimitMiddleware:
     def __init__(
-        self, app: ASGIApp, default: str, write: str, ai: str, enabled: bool = True
+        self,
+        app: ASGIApp,
+        default: str,
+        write: str,
+        ai: str,
+        enabled: bool = True,
+        trusted_proxy_hops: int = 0,
     ) -> None:
         self.app = app
         self.enabled = enabled
+        self.hops = trusted_proxy_hops
         self.rules = {
             name: Rule(name, *parse_limit(v))
             for name, v in (("default", default), ("write", write), ("ai", ai))
@@ -57,10 +64,17 @@ class RateLimitMiddleware:
         return rules
 
     def _client(self, scope: Scope) -> str:
+        """Client key for the limiter (SEC-003). X-Forwarded-For is attacker-controlled on the left, so it is ignored
+        unless TRUSTED_PROXY_HOPS says how many proxies of ours sit in front; then the entry that the nearest
+        trusted proxy appended (counting from the right) is used. Run uvicorn WITHOUT --forwarded-allow-ips '*'."""
         client = scope.get("client")
-        return (
-            client[0] if client else "unknown"
-        )  # uvicorn --proxy-headers resolves X-Forwarded-For
+        peer: str = str(client[0]) if client else "unknown"
+        if self.hops > 0:
+            raw = dict(scope.get("headers") or []).get(b"x-forwarded-for", b"").decode("latin-1")
+            parts: list[str] = [str(p).strip() for p in raw.split(",") if p.strip()]
+            if len(parts) >= self.hops:
+                return str(parts[-self.hops])[:64]
+        return peer
 
     def check(self, client: str, method: str, path: str, now: float | None = None) -> int | None:
         """Count the request; return seconds to wait when a limit is exceeded, else None."""

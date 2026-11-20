@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from typing import Any
 
@@ -10,6 +11,12 @@ from pymongo.asynchronous.collection import AsyncCollection
 from app.db import get_db
 from app.errors import forbidden
 from app.principal import Principal
+
+
+def rx_escape(text: str) -> str:
+    """Literal-match regex for search text. NUL bytes are dropped: MongoDB rejects them in a regex and the
+    resulting driver error used to surface as a 503 that any signed-in user could trigger (SEC-002)."""
+    return re.escape(text.replace("\x00", ""))
 
 
 def now() -> datetime:

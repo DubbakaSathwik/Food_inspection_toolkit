@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import re
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -12,7 +11,7 @@ from pymongo import ReturnDocument
 
 from app.errors import AppError, not_found
 from app.principal import Principal
-from app.repositories.base import col, ensure_admin, next_sequence, now, paginate
+from app.repositories.base import col, ensure_admin, next_sequence, now, paginate, rx_escape
 
 
 def _own(p: Principal, inspection_id: str) -> dict[str, Any]:
@@ -148,7 +147,7 @@ async def delete_draft(p: Principal, inspection_id: str) -> dict[str, Any]:
 def _history_filter(p: Principal, q: dict[str, Any]) -> dict[str, Any]:
     flt: dict[str, Any] = {"owner_uid": p.uid}
     if q.get("q"):
-        rx = {"$regex": re.escape(q["q"]), "$options": "i"}
+        rx = {"$regex": rx_escape(q["q"]), "$options": "i"}
         flt["$or"] = [{"summary.product_name": rx}, {"summary.brand": rx}, {"_id": rx}]
     if q.get("category"):
         flt["category"] = q["category"]

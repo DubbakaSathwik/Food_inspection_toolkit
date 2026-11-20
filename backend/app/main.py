@@ -121,6 +121,7 @@ def create_app() -> FastAPI:
         write=s.rate_limit_write,
         ai=s.rate_limit_ai,
         enabled=s.app_env != "test",
+        trusted_proxy_hops=s.trusted_proxy_hops,
     )
     app.add_middleware(
         CORSMiddleware,

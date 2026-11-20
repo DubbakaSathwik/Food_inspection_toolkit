@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Keep the placeholder example file tracked (real values live in .env.local, which stays ignored)
+!.env.example

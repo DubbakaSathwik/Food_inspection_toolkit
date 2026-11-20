@@ -15,6 +15,7 @@ import firebase_admin
 from fastapi import Depends, Request
 from firebase_admin import auth as fb_auth
 from firebase_admin import credentials
+from google.auth.exceptions import DefaultCredentialsError
 from starlette.concurrency import run_in_threadpool
 
 from app.config import get_settings
@@ -35,6 +36,13 @@ def init_firebase() -> None:
         # The Admin SDK reads the emulator host from the process environment (not from .env).
         os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = s.firebase_auth_emulator_host
     cred: credentials.Base | None = None
+    if (
+        s.is_production
+        and not s.firebase_service_account_json
+        and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    ):
+        # SEC-004: without credentials every token check crashed with a 500 at request time; fail at startup instead.
+        raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON is required in production")
     if s.firebase_service_account_json:
         cred = credentials.Certificate(json.loads(s.firebase_service_account_json))
     firebase_admin.initialize_app(cred, {"projectId": s.firebase_project_id})
@@ -62,7 +70,8 @@ async def verify_token(token: str, check_revoked: bool = False) -> dict[str, Any
     except (fb_auth.ExpiredIdTokenError, fb_auth.InvalidIdTokenError, ValueError) as e:
         log.info("token rejected: %s", type(e).__name__)
         raise _unauth() from e
-    except fb_auth.CertificateFetchError as e:
+    except (fb_auth.CertificateFetchError, DefaultCredentialsError) as e:
+        log.error("sign-in verification unavailable: %s", type(e).__name__)
         raise AppError(503, "auth_unavailable", "Sign-in service unavailable. Try again.") from e
 
 
@@ -70,7 +79,7 @@ async def token_claims(request: Request) -> dict[str, Any]:
     claims = await verify_token(_bearer(request))
     if not claims.get("email"):
         raise _unauth("A Google account with an email address is required.")
-    if claims.get("firebase", {}).get("sign_in_provider") not in ("google.com", None):
+    if claims.get("firebase", {}).get("sign_in_provider") != "google.com":
         raise _unauth("Please sign in with Google.")
     return claims
 

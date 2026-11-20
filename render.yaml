@@ -13,7 +13,7 @@ services:
     branch: main
     autoDeployTrigger: checksPass
     buildCommand: pip install "uv==0.11.32" && uv sync --frozen --no-dev && .venv/bin/python -m scripts.migrate
-    startCommand: .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"
+    startCommand: .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -51,6 +51,9 @@ services:
         sync: false
       - key: OCR_ENABLED
         value: "false"
+      # One Render proxy sits in front of the API; the rate limiter reads the client address it appended (SEC-003).
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
       - key: RATE_LIMIT_DEFAULT
         value: 240/minute
       - key: RATE_LIMIT_WRITE

@@ -14,7 +14,10 @@ from PIL import Image, ImageFile, ImageOps, UnidentifiedImageError
 
 from app.errors import AppError
 
-Image.MAX_IMAGE_PIXELS = 60_000_000  # decompression-bomb guard
+MAX_PIXELS = 50_000_000  # hard cap checked BEFORE decoding (a 48 MP phone photo fits)
+Image.MAX_IMAGE_PIXELS = (
+    MAX_PIXELS  # Pillow only errors at 2x this value, so we also check explicitly below
+)
 ImageFile.LOAD_TRUNCATED_IMAGES = False
 
 ALLOWED_FORMATS = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
@@ -41,6 +44,14 @@ def inspect_upload(data: bytes, max_bytes: int) -> dict[str, Any]:
     try:
         with Image.open(io.BytesIO(data)) as probe:
             fmt = probe.format or ""
+            if (
+                probe.width * probe.height > MAX_PIXELS
+            ):  # SEC-001: decoding a huge image would exhaust memory
+                raise AppError(
+                    413,
+                    "image_too_large",
+                    f"The photo is too large ({probe.width}×{probe.height}). Use at most {MAX_PIXELS // 1_000_000} megapixels.",
+                )
             probe.verify()
         with Image.open(io.BytesIO(data)) as raw:
             w, h = _oriented(raw).size

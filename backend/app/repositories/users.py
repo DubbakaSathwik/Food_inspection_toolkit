@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from datetime import timedelta
 from typing import Any
 
@@ -11,7 +10,7 @@ from pymongo import ReturnDocument
 from app.errors import AppError, forbidden, not_found
 from app.principal import Principal
 from app.repositories import audit
-from app.repositories.base import col, ensure_admin, now, paginate
+from app.repositories.base import col, ensure_admin, now, paginate, rx_escape
 
 _last_touch: dict[str, float] = {}
 
@@ -120,7 +119,7 @@ async def touch_active(uid: str) -> None:
 def _user_filter(q: str | None, role: str | None, status: str | None) -> dict[str, Any]:
     flt: dict[str, Any] = {}
     if q:
-        rx = {"$regex": re.escape(q), "$options": "i"}
+        rx = {"$regex": rx_escape(q), "$options": "i"}
         flt["$or"] = [{"name": rx}, {"email": rx}, {"office": rx}]
     if role:
         flt["role"] = role

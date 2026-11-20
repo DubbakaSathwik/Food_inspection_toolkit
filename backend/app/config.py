@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     max_json_kb: int = 1024
     rate_limit_default: str = "240/minute"
     rate_limit_ai: str = "12/minute"
+    # Number of reverse proxies of ours in front of the app (Render: 1). 0 = ignore X-Forwarded-For (secure default).
+    trusted_proxy_hops: int = Field(0, ge=0, le=5)
     rate_limit_write: str = "60/minute"
 
     # AI providers
