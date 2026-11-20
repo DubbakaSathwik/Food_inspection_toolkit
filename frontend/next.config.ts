@@ -19,6 +19,10 @@ function securityHeaders() {
     process.env.NEXT_PUBLIC_USE_AUTH_EMULATOR === "true"
       ? origin(process.env.NEXT_PUBLIC_AUTH_EMULATOR_URL ?? "http://127.0.0.1:9099")
       : null;
+  // Firebase loads its auth helper page in a hidden frame from the auth domain (or from the emulator in tests).
+  const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    ? origin(`https://${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`)
+    : null;
   const connect = [
     "'self'",
     api,
@@ -35,7 +39,7 @@ function securityHeaders() {
     `img-src ${["'self'", "data:", "blob:", api, "https://lh3.googleusercontent.com"].filter(Boolean).join(" ")}`,
     "font-src 'self' data:",
     `connect-src ${connect.filter(Boolean).join(" ")}`,
-    "frame-src https://*.firebaseapp.com https://accounts.google.com",
+    `frame-src ${["https://*.firebaseapp.com", "https://accounts.google.com", authDomain, emulator].filter(Boolean).join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
