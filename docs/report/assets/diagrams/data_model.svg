@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1000" viewBox="0 0 1700 1000"><defs><marker id="ah" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1,1 L11,6 L1,11 z" fill="#56703a"/></marker><marker id="ahs" markerWidth="12" markerHeight="12" refX="2" refY="6" orient="auto"><path d="M11,1 L1,6 L11,11 z" fill="#56703a"/></marker></defs>
+<rect width="1700" height="1000" fill="#fbf8f0"/>
+<text x="40" y="52" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="30" font-weight="800" fill="#3e5228" text-anchor="start">Data model (MongoDB collections)</text>
+<rect x="40" y="100" width="380" height="230" rx="16" fill="#e2e8ee" stroke="#2f4a63" stroke-width="1.8"/>
+<text x="60" y="136" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#2f4a63" text-anchor="start">users</text>
+<text x="60" y="168.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">_id (Firebase uid) · email · name</text>
+<text x="60" y="189.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">role: inspector | admin | super_admin</text>
+<text x="60" y="210.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">status: pending | active | disabled | declined</text>
+<text x="60" y="231.075" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">designation · office · created_at</text>
+<rect x="40" y="370" width="380" height="170" rx="16" fill="#e2e8ee" stroke="#2f4a63" stroke-width="1.8"/>
+<text x="60" y="406" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#2f4a63" text-anchor="start">user_invites</text>
+<text x="60" y="438.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">_id (email) · role · created_by</text>
+<text x="60" y="459.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">accepted on first verified sign-in</text>
+<rect x="40" y="580" width="380" height="170" rx="16" fill="#e2e8ee" stroke="#2f4a63" stroke-width="1.8"/>
+<text x="60" y="616" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#2f4a63" text-anchor="start">usage_metrics</text>
+<text x="60" y="648.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">uid · day · ai_calls</text>
+<text x="60" y="669.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">atomic daily AI quota per inspector</text>
+<rect x="40" y="790" width="380" height="160" rx="16" fill="#eceae2" stroke="#4d4f46" stroke-width="1.8"/>
+<text x="60" y="826" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#4d4f46" text-anchor="start">settings · counters</text>
+<text x="60" y="858.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">settings: one global document</text>
+<text x="60" y="879.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">counters: CS-year and REF numbers</text>
+<rect x="520" y="100" width="470" height="360" rx="16" fill="#e3eacf" stroke="#3e5228" stroke-width="1.8"/>
+<text x="540" y="136" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#3e5228" text-anchor="start">inspections</text>
+<text x="540" y="168.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">_id CS-2026-0001 · owner_uid · status</text>
+<text x="540" y="189.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">category · photos[ ≤5 ] (GridFS ids)</text>
+<text x="540" y="210.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">fields{ 22 label fields: value, AI value,</text>
+<text x="540" y="231.075" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">   confidence, status, flag }</text>
+<text x="540" y="252.1" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">findings[ rule, severity, decision ]</text>
+<text x="540" y="273.125" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">analysis (matched reference) · decision</text>
+<text x="540" y="294.15" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">report (PDF id, number)</text>
+<rect x="520" y="500" width="470" height="170" rx="16" fill="#e3eacf" stroke="#3e5228" stroke-width="1.8"/>
+<text x="540" y="536" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#3e5228" text-anchor="start">inspection_notes · chat_messages</text>
+<text x="540" y="568.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">owner_uid · inspection_id · text</text>
+<text x="540" y="589.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">chat: role, web flag, sources, provider</text>
+<rect x="520" y="710" width="470" height="240" rx="16" fill="#e3eacf" stroke="#3e5228" stroke-width="1.8"/>
+<text x="540" y="746" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#3e5228" text-anchor="start">product_proposals</text>
+<text x="540" y="778.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">_id · owner_uid · inspection_id</text>
+<text x="540" y="799.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">product{ name, brand, category … }</text>
+<text x="540" y="820.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">status: pending | info_requested | approved</text>
+<text x="540" y="841.075" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">reviews[ ] · messages[ ]</text>
+<rect x="1090" y="100" width="570" height="260" rx="16" fill="#fbefd9" stroke="#7a4808" stroke-width="1.8"/>
+<text x="1110" y="136" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#7a4808" text-anchor="start">reference_records (DEMO)</text>
+<text x="1110" y="168.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">_id REF-0001 · product · brand · variant</text>
+<text x="1110" y="189.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">manufacturer{ name, address, state }</text>
+<text x="1110" y="210.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">licence{ number, validity, status }</text>
+<text x="1110" y="231.075" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">package_sizes · packaging images (GridFS)</text>
+<rect x="1090" y="400" width="570" height="240" rx="16" fill="#fbefd9" stroke="#7a4808" stroke-width="1.8"/>
+<text x="1110" y="436" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#7a4808" text-anchor="start">compliance_rules (versioned)</text>
+<text x="1110" y="468.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">code DR-LB-01 … · category · check_type</text>
+<text x="1110" y="489.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">requirement · regulatory reference</text>
+<text x="1110" y="510.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">severity · status · version · history[ ]</text>
+<rect x="1090" y="680" width="570" height="270" rx="16" fill="#eceae2" stroke="#4d4f46" stroke-width="1.8"/>
+<text x="1110" y="716" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="19" font-weight="800" fill="#4d4f46" text-anchor="start">audit_logs + GridFS stores</text>
+<text x="1110" y="748.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">audit_logs: actor · action · record · changes</text>
+<text x="1110" y="769.025" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">(append-only: no update or delete API)</text>
+<text x="1110" y="790.05" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">GridFS: photos · reports · refimages ·</text>
+<text x="1110" y="811.075" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="14.5" font-weight="500" fill="#20231d" text-anchor="start">siteimages (originals deleted after report)</text>
+<line x1="420" y1="220" x2="520" y2="220" stroke="#56703a" stroke-width="2.4" marker-end="url(#ah)" marker-start="url(#ahs)"/>
+<text x="470.0" y="212.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">1 : N</text>
+<line x1="755" y1="460" x2="755" y2="500" stroke="#56703a" stroke-width="2.4" marker-end="url(#ah)" marker-start="url(#ahs)"/>
+<text x="800" y="472.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">1 : N</text>
+<line x1="755" y1="670" x2="755" y2="710" stroke="#56703a" stroke-width="2.4" marker-end="url(#ah)" marker-start="url(#ahs)"/>
+<text x="800" y="682.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">1 : N</text>
+<line x1="990" y1="230" x2="1090" y2="230" stroke="#56703a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<text x="1040.0" y="222.0" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">matched</text>
+<line x1="990" y1="330" x2="1090" y2="480" stroke="#56703a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<text x="1100" y="395" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">checked against</text>
+<line x1="230" y1="370" x2="230" y2="330" stroke="#56703a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<text x="300" y="358" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">accepted into</text>
+<line x1="1100" y1="830" x2="990" y2="830" stroke="#56703a" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<text x="1045" y="815" font-family="Inter, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#55584e" text-anchor="middle">records</text>
+</svg>
