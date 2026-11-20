@@ -218,8 +218,8 @@ def title_slide():
     names = "   ".join(f"{n}, {r}" for n, r in C.TEAM)
     text(s, 0.9, 5.6, 5.9, 1.2, ["**Team:** " + " | ".join(f"{n} ({r})" for n, r in C.TEAM), f"**Guide:** {C.GUIDE[0]}, {C.GUIDE[1]}"], 12.5, TEXT, space_after=4)
     _ = names
-    picture(s, img("01-landing", "screens"), 7.2, 2.5, w=5.5, frame=True)
-    picture(s, img("03-inspector-dashboard", "screens", mob=True), 11.3, 4.35, w=1.5, frame=True)
+    picture(s, img("07-findings", "screens"), 7.2, 2.5, w=5.5, frame=True)
+    picture(s, img("07-findings", "screens", mob=True), 11.3, 4.35, w=1.5, frame=True)
     chip(s, 7.2, 5.75, 2.5, "Next.js · FastAPI · MongoDB", SOFT, GREEN_D, 11)
     return s
 
@@ -246,7 +246,7 @@ def applications_slide():
     card(s, 6.8, 1.85, 5.9, 5.05, "Challenges addressed", [
         "AI can misread small print → confidence + human verification", "Providers can be slow or unavailable → retry, fallback, incomplete state",
         "Photographs are sensitive → owner-only access, delete after report", "Role misuse → admin approval and server-side role checks",
-        "Phones in the field → mobile-first layout, autosave", "Trust in findings → rules, evidence photos, audit trail"], 16, bullets=True)
+        "Phones in the field → mobile-first layout, autosave", "Trust in findings → rules, evidence photos, audit trail"], 17, bullets=True)
 
 
 def tech_slide():
@@ -430,32 +430,111 @@ def thanks_slide():
          14.5, TEXT, align=PP_ALIGN.CENTER, space_after=4)
 
 
+def tech_io_slide():
+    s = new_slide("Technology Stack and Input / Output", "Requirements")
+    items = [("Next.js 16 · React 19", "TypeScript, Tailwind — responsive UI"), ("FastAPI · Python 3.12", "Typed API, 78 routes"), ("MongoDB Atlas", "Documents + GridFS files"), ("Firebase Auth", "Google sign-in, role claims"),
+             ("Gemini · NVIDIA · OCR", "Ordered AI fallback"), ("ReportLab · Pillow", "13-section PDF, photo checks"), ("Render", "API + website auto-deploy"), ("GitHub Actions", "Tests, scans, CodeQL")]
+    for i, (a, b) in enumerate(items):
+        x, y = 0.6 + (i % 4) * 3.07, 1.85 + (i // 4) * 1.45
+        rect(s, x, y, 2.9, 1.3, SOFT if (i + i // 4) % 2 == 0 else SURF, GREEN if (i + i // 4) % 2 == 0 else BORDER)
+        text(s, x + 0.15, y + 0.12, 2.6, 0.5, a, 15.5, GREEN_D, True, HEAD)
+        text(s, x + 0.15, y + 0.72, 2.6, 0.5, b, 12, TEXT2)
+    card(s, 0.6, 4.85, 5.95, 2.05, "Inputs", ["Up to 5 product photos (JPG, PNG, WebP)", "Google sign-in; inspector confirmations, corrections and decisions", "Admin data: reference records, rules, settings"], 14.5, bullets=True)
+    card(s, 6.75, 4.85, 5.95, 2.05, "Outputs", ["22 label fields with confidence; findings with evidence", "13-section PDF report; CSV / Excel exports", "Dashboards: history, analytics, audit log, diagnostics"], 14.5, bullets=True)
+
+
+def workflow_actors_slide():
+    s = new_slide("Inspection Workflow and Users", "Design")
+    from PIL import Image
+
+    path = deck_diagram("workflow")
+    im = Image.open(path)
+    wi = min(10.3, 4.1 / (im.size[1] / im.size[0]))
+    picture(s, path, (13.333 - wi) / 2, 1.75, w=wi)
+    roles = [("Inspector", "Photographs, verifies fields, decides findings, downloads the report, asks AI"),
+             ("Admin", "Approves users, manages reference data and rules, reviews proposals, analytics, diagnostics"),
+             ("Super Admin", "Everything an admin does, plus managing administrator accounts")]
+    for i, (a, b) in enumerate(roles):
+        x = 0.6 + i * 4.1
+        rect(s, x, 6.0, 3.95, 0.95, SOFT if i == 0 else (INFO_BG if i == 1 else WARN_BG), None, radius=0.1)
+        text(s, x + 0.15, 6.03, 3.65, 0.3, a, 13, GREEN_D if i == 0 else (INFO_FG if i == 1 else WARN_FG), True)
+        text(s, x + 0.15, 6.32, 3.65, 0.62, b, 10.5, TEXT2, line=1.0, space_after=0)
+
+
+def modules_data_slide():
+    s = new_slide("Modules and Data Model", "Design")
+    mods = [("User and access", "Google sign-in, approval, roles, invitations"), ("Inspection workflow", "Six guided, auto-saved steps"),
+            ("AI extraction and validation", "Provider chain, retry, OCR fallback, format checks"), ("Matching and rules", "Reference matching, versioned compliance rules"),
+            ("Report generator", "13-section PDF with evidence and disclaimers"), ("Ask-AI and proposals", "Assistant with history; new-product proposals"),
+            ("Admin, analytics and audit", "Users, reference data, charts, append-only audit log"), ("Diagnostics and security", "Live dependency checks; rate limits, roles, owner-scoped data")]
+    for i, (a, b) in enumerate(mods):
+        x, y = 0.6 + (i % 2) * 4.15, 1.8 + (i // 2) * 1.2
+        rect(s, x, y, 4.0, 1.08, SURF, BORDER, radius=0.1)
+        text(s, x + 0.15, y + 0.08, 3.7, 0.35, a, 13.5, GREEN_D, True)
+        text(s, x + 0.15, y + 0.46, 3.7, 0.6, b, 11.5, TEXT2, line=1.0, space_after=0)
+    card(s, 9.1, 1.8, 3.6, 4.7, "MongoDB collections", [
+        "users · user_invites", "inspections (22 fields, findings, decision)", "inspection_notes", "reference_records (demo data)", "compliance_rules (versioned)", "product_proposals",
+        "chat_messages · audit_logs", "usage_metrics · counters · settings", "GridFS: photos, reports, images"], 11.5, bullets=True)
+    text(s, 0.6, 6.7, 8.4, 0.35, "Validators and indexes are created by ordered, idempotent migrations.", 11.5, TEXT2, italic=True)
+
+
+def ui_slide():
+    s = new_slide("Results: User Interface", "Testing / Results")
+    shots = [("05-verify-fields", "Verify extracted fields"), ("07-findings", "Findings and evidence"), ("08-report", "Inspection report"), ("11-admin-dashboard", "Admin dashboard")]
+    for i, (nm, cap) in enumerate(shots):
+        x, y = 0.6 + (i % 2) * 3.95, 1.8 + (i // 2) * 2.6
+        picture(s, img(nm, "screens"), x, y, w=3.7)
+        text(s, x, y + 2.33, 3.7, 0.3, cap, 11.5, GREEN_D, True, align=PP_ALIGN.CENTER)
+    card(s, 8.7, 1.8, 4.0, 4.95, "What the tests confirm", [
+        "Every screen renders on desktop and phone", "No console errors or sideways scrolling", "AI value kept beside the inspector's correction",
+        "Findings show rule, evidence and decision", "Report preview and PDF download"], 14, bullets=True)
+
+
+def security_testing_slide():
+    s = new_slide("Security and Testing", "Testing / Results")
+    tiles = [("75", "backend tests", "89 % coverage"), ("9", "unit tests", "front-end"), ("44", "browser tests", "desktop + mobile"), ("49", "attack tests", "security suite"), ("6", "CI checks", "all green")]
+    for i, (n, a, b) in enumerate(tiles):
+        x = 0.6 + i * 2.45
+        rect(s, x, 1.8, 2.3, 1.75, SOFT if i % 2 == 0 else SURF, GREEN if i % 2 == 0 else BORDER)
+        text(s, x, 1.85, 2.3, 0.8, n, 38, GREEN_D, True, HEAD, align=PP_ALIGN.CENTER)
+        text(s, x, 2.62, 2.3, 0.4, a, 13.5, TEXT, True, align=PP_ALIGN.CENTER)
+        text(s, x, 2.98, 2.3, 0.4, b, 11.5, TEXT2, align=PP_ALIGN.CENTER)
+    card(s, 0.6, 3.8, 6.0, 3.1, "Security by design", [
+        "Google-only sign-in; admin approval; server-side roles", "Every request: rate limit → token check → role → owner-scoped query", "Strict models; uploads decoded and size/pixel limited",
+        "Originals deleted after the report; audit log append-only", "Protected main branch; secrets scanned"], 14, bullets=True)
+    card(s, 6.8, 3.8, 5.9, 3.1, "Attacks tested, issues fixed", [
+        "Forged tokens, cross-user access, injection, bad uploads", "Huge-image memory exhaustion → 50 MP cap", "Rate-limit spoofing → trusted proxy chain",
+        "Reasoning-model empty answers → thinking off", "Flaky tests and CSP gaps → fixed in CI"], 14, bullets=True)
+
+
+def closing_slide():
+    global slide_no
+    slide_no += 1
+    s = prs.slides.add_slide(BLANK)
+    bg(s)
+    rect(s, 0, 0, 0.18, 7.5, GREEN, None, shape=MSO_SHAPE.RECTANGLE)
+    chip(s, 0.6, 0.38, 2.2, "CONCLUSION", SOFT, GREEN_D, 10.5)
+    text(s, 0.55, 0.72, 12.2, 0.8, "Conclusion, Future Work and References", 32, GREEN_D, True, HEAD, anchor=MSO_ANCHOR.MIDDLE)
+    card(s, 0.6, 1.75, 4.0, 3.95, "Conclusion", ["Guided, evidence-based inspection with the inspector in charge", "Layered, secure and tested at five levels", "Limits: demo reference data, AI availability, free-tier sleep"], 14, bullets=True)
+    card(s, 4.75, 1.75, 4.0, 3.95, "Future enhancements", ["Official reference data and licence verification", "Mobile app with offline mode and barcode scan", "Multilingual labels; model evaluation", "Assignment, supervisor review, trend alerts"], 14, bullets=True)
+    refs = ["FastAPI · fastapi.tiangolo.com", "Next.js · nextjs.org/docs", "MongoDB · mongodb.com/docs", "Firebase Auth · firebase.google.com/docs/auth", "Gemini API · ai.google.dev/gemini-api/docs", "FSSAI · fssai.gov.in", "OWASP ASVS · owasp.org"]
+    card(s, 8.9, 1.75, 3.8, 3.95, "References", refs, 12.5, bullets=True)
+    rect(s, 0.6, 5.95, 12.1, 0.95, GREEN_D, None, radius=0.12)
+    text(s, 0.9, 5.98, 5, 0.9, "Thank You!  Questions?", 26, RGBColor(0xFF, 0xFF, 0xFF), True, HEAD, anchor=MSO_ANCHOR.MIDDLE)
+    text(s, 6.2, 5.98, 6.3, 0.9, ["**Team:** " + " | ".join(f"{n} ({r})" for n, r in C.TEAM), f"**Guide:** {C.GUIDE[0]}, {C.GUIDE[1]}"], 11.5, RGBColor(0xFF, 0xFF, 0xFF), anchor=MSO_ANCHOR.MIDDLE, space_after=2)
+
+
 def build():
     title_slide()
     problem_slide()
     applications_slide()
-    tech_slide()
-    io_slide()
+    tech_io_slide()
     diagram_slide("Proposed System Architecture", "Design", "architecture")
-    diagram_slide("System Design: Use-Case Diagram", "Design", "use_case")
-    diagram_slide("Inspection Workflow", "Design", "workflow")
-    diagram_slide("System Design: Data Model", "Design", "data_model")
-    modules_slide()
-    security_slide()
-    code_slide()
-    results_slide("Testing / Results: Landing Page and Sign-In", [("01-landing", "Landing page", False), ("02-signin", "Google sign-in", False)])
-    results_slide("Testing / Results: Inspector Dashboard and New Inspection", [("03-inspector-dashboard", "Inspector dashboard", False), ("04-new-inspection", "Step 1 – photographs", False)])
-    results_slide("Testing / Results: Verification and AI Review", [("05-verify-fields", "Step 2 – verify extracted fields", False), ("06-ai-review", "Step 3 – AI review", False)])
-    results_slide("Testing / Results: Findings and Report", [("07-findings", "Step 4 – findings and evidence", False), ("08-report", "Step 5 – inspection report", False)])
-    results_slide("Testing / Results: History and Ask AI", [("09-history", "Inspection history", False), ("10-ask-ai", "Ask AI assistant", False)])
-    results_slide("Testing / Results: Administrator Console", [("11-admin-dashboard", "Admin dashboard", False), ("12-reference-database", "Reference database", False), ("15-users", "User management", False)])
-    results_slide("Testing / Results: Rules, Analytics and Diagnostics", [("13-compliance-rules", "Compliance rules", False), ("16-analytics", "Analytics", False), ("18-diagnostics", "System diagnostics", False)])
-    mobile_slide()
-    testing_slide()
-    cicd_slide()
-    conclusion_slide()
-    references_slide()
-    thanks_slide()
+    workflow_actors_slide()
+    modules_data_slide()
+    ui_slide()
+    security_testing_slide()
+    closing_slide()
     out = OUT / f"{NAME}.pptx"
     prs.save(out)
     subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(OUT), str(out)], check=True, capture_output=True, timeout=300)
