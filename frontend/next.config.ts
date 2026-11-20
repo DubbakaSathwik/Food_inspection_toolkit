@@ -30,6 +30,7 @@ function securityHeaders() {
     "https://identitytoolkit.googleapis.com",
     "https://securetoken.googleapis.com",
     "https://www.googleapis.com",
+    "https://apis.google.com", // Google's sign-in helper script sends a small beacon here (CSP error in the console otherwise)
   ];
   const csp = [
     "default-src 'self'",
