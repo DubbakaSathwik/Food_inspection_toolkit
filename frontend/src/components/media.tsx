@@ -39,14 +39,13 @@ export function ImageSlot({
     };
   }, [slot]);
   if (img) {
+    // The uploaded image lives in the SAME box as the placeholder (same classes/style) and is cropped to fill it,
+    // so the layout never changes when an image is added, whatever the photo's own proportions.
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- served by our API, dimensions vary
-      <img
-        src={publicUrl(img.url)}
-        alt={img.alt || label}
-        className={`object-cover ${className}`}
-        style={{ borderRadius: 12, width: "100%", ...style }}
-      />
+      <div className={`relative overflow-hidden ${className}`} style={{ borderRadius: 12, ...style }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- served by our API, dimensions vary */}
+        <img src={publicUrl(img.url)} alt={img.alt || label} className="absolute inset-0 h-full w-full object-cover" />
+      </div>
     );
   }
   return (

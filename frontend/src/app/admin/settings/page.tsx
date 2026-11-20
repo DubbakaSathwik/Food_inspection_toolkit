@@ -17,29 +17,31 @@ const TABS = [
   ["account", "My account"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
+/** [key, title, where it appears, recommended size, tip]. RATIO is the shape of the box on the live page (the image is cropped to fill it). */
 const SLOTS = [
   [
     "hero",
     "Landing page hero",
     "Public landing page, beside the main heading.",
-    "Recommended 1200 × 1200 px",
-    "Use a clean product photograph on a neutral surface.",
+    "1200 × 1050 px (8:7)",
+    "Clean product photograph on a neutral surface. Keep the subject in the middle; the edges may be cropped.",
   ],
   [
     "signin",
     "Sign-in panel",
     "Left panel of the sign-in and awaiting-approval screens.",
-    "Recommended 1000 × 1400 px",
-    "Portrait orientation works best.",
+    "1200 × 1200 px (1:1, square)",
+    "Square works best. On phones this panel becomes a wide strip, so keep the subject in the centre.",
   ],
   [
     "banner",
     "Inspector dashboard banner",
     'Beside "Start a New Inspection" on the inspector dashboard.',
-    "Recommended 1000 × 600 px",
-    "Landscape; keep the left third uncluttered.",
+    "1600 × 600 px (8:3, wide)",
+    "Wide landscape. The sides are cropped on narrow screens, so keep the subject in the middle.",
   ],
 ] as const;
+const RATIO: Record<string, number> = { hero: 8 / 7, signin: 1, banner: 8 / 3 };
 
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>("images");
@@ -192,16 +194,26 @@ export default function SettingsPage() {
                         key={`${k}-${imgV}`}
                         slot={k}
                         label={info ? t : "Current: placeholder"}
-                        className="w-[180px] h-[124px] max-[760px]:w-full"
+                        className="w-[200px] self-start max-[760px]:w-full"
+                        style={{ aspectRatio: String(RATIO[k]) }}
                       />
                       <div className="flex-1 min-w-[220px] flex flex-col gap-1.5">
                         <strong>{t}</strong>
                         <span style={{ fontSize: 13.5, color: "#55584E" }}>{where}</span>
-                        <span style={{ fontSize: 12.5, color: "#686B60" }}>{size} · JPG, PNG or WebP · up to 5 MB</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#20231D" }}>Use an image of {size}</span>
+                        <span style={{ fontSize: 12.5, color: "#686B60" }}>
+                          JPG, PNG or WebP · up to 5 MB · the box on the left shows the exact shape
+                        </span>
                         <span style={{ fontSize: 12.5, color: "#686B60" }}>{tip}</span>
                         <span style={{ fontSize: 12.5, fontWeight: 700, color: "#56703A" }}>
                           {info ? `Custom image (${String(info.width)}×${String(info.height)})` : "Showing the labelled placeholder"}
                         </span>
+                        {info && Math.abs(Number(info.width) / Number(info.height) / RATIO[k] - 1) > 0.25 && (
+                          <span style={{ fontSize: 12.5, color: "#7A4808" }}>
+                            This image has a different shape from the box, so it will be cropped to fit. Use {size} to control what is
+                            visible.
+                          </span>
+                        )}
                         <div className="flex flex-wrap gap-2.5 mt-1 cs-acts">
                           <Button
                             small
