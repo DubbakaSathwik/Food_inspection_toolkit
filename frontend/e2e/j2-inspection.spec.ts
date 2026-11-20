@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { approvedUser, fixture, signIn, uniqueEmail } from "./helpers";
+import { approvedUser, fileInputReady, fixture, signIn, uniqueEmail } from "./helpers";
 
 test("full inspection: photos → crop → AI reading → corrections → AI review → findings → decision → report → PDF → note", async ({
   page,
@@ -16,6 +16,7 @@ test("full inspection: photos → crop → AI reading → corrections → AI rev
   await page.getByRole("radio", { name: "Groceries & Food Staples" }).click();
   await expect(page).toHaveURL(/\/inspector\/new\?id=CS-/);
   const id = new URL(page.url()).searchParams.get("id")!;
+  await fileInputReady(page);
   await page.locator('input[type="file"][multiple]').setInputFiles([fixture("front.png"), fixture("back.png"), fixture("blurry.png")]);
   await expect(page.getByText("3 of 5 added")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Issue found in Photo 3/)).toBeVisible();
@@ -108,6 +109,7 @@ test("AI provider outage: inspection saved as incomplete, then retried successfu
   await approvedUser(email);
   await signIn(page, email, "Omar Outage");
   await page.goto("/inspector/new");
+  await fileInputReady(page);
   await page.locator('input[type="file"][multiple]').setInputFiles([fixture("fail.png")]);
   await expect(page.getByText("1 of 5 added")).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Extract Label Information" }).click();
@@ -123,6 +125,7 @@ test("AI provider outage: inspection saved as incomplete, then retried successfu
     .click();
   await page.getByRole("button", { name: "Change photographs" }).click();
   await page.getByRole("button", { name: "Replace" }).click();
+  await fileInputReady(page);
   await page.locator('input[type="file"][multiple]').setInputFiles([fixture("front.png")]);
   await expect(page.getByText("1 of 5 added")).toBeVisible();
   await expect(page.getByText(/Clear and readable/)).toBeVisible({ timeout: 30_000 });

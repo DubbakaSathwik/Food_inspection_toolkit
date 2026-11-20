@@ -112,3 +112,11 @@ export async function completedInspection(email: string): Promise<string> {
   if (!r.ok) throw new Error(`report ${r.status}`);
   return id;
 }
+
+/** Waits until React has attached to the photo input. Setting files before hydration loses the change event (flaky on slow CI). */
+export async function fileInputReady(page: import("@playwright/test").Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const el = document.querySelector('input[type="file"][multiple]');
+    return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps"));
+  });
+}
