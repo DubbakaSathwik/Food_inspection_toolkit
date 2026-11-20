@@ -339,7 +339,11 @@ def code_slide():
 def results_slide(title, pairs, kicker="Testing / Results"):
     s = new_slide(title, kicker)
     n = len(pairs)
-    if n == 2:
+    if n == 1:
+        name, cap, _m = pairs[0]
+        picture(s, img(name, "screens"), 2.9, 1.8, w=7.5)
+        text(s, 2.9, 1.8 + 7.5 / 1.6 + 0.1, 7.5, 0.4, cap, 14, GREEN_D, True, align=PP_ALIGN.CENTER)
+    elif n == 2:
         w = 5.95
         for i, (name, cap, mob) in enumerate(pairs):
             x = 0.6 + i * 6.15
@@ -528,13 +532,20 @@ def build():
     title_slide()
     problem_slide()
     applications_slide()
-    tech_io_slide()
+    tech_slide()
+    io_slide()
     diagram_slide("Proposed System Architecture", "Design", "architecture")
-    workflow_actors_slide()
-    modules_data_slide()
-    ui_slide()
-    security_testing_slide()
-    closing_slide()
+    diagram_slide("System Design: Use-Case Diagram", "Design", "use_case")
+    diagram_slide("System Design: Class Diagram", "Design", "data_model")
+    diagram_slide("System Design: Activity Diagram", "Design", "workflow")
+    modules_slide()
+    code_slide()
+    results_slide("Testing / Results: Landing Page", [("01-landing", "Public landing page", False)] , )
+    results_slide("Testing / Results: Sign-In", [("02-signin", "Google sign-in page", False)])
+    results_slide("Testing / Results: Sign-Up and Approval", [("02-signin", "New accounts sign in with Google", False), ("15-users", "Administrator approves and assigns a role", False)])
+    conclusion_slide()
+    references_slide()
+    thanks_slide()
     out = OUT / f"{NAME}.pptx"
     prs.save(out)
     subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(OUT), str(out)], check=True, capture_output=True, timeout=300)
