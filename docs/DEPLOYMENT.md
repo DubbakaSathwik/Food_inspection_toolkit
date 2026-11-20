@@ -53,7 +53,7 @@ Open a pull request `feature/initial-build` → `main`, wait for the green check
    - on **crate-scan-api**: `CORS_ALLOWED_ORIGINS` = the website's real `https://….onrender.com` address
 5. Open `https://<api>.onrender.com/health` → `{"status":"ok","database":"ok",…}`. Then open the website.
 
-   The blueprint also sets `TRUSTED_PROXY_HOPS=1` and starts the API without proxy-header trust (so callers cannot spoof their address
+   The blueprint also sets `TRUSTED_PROXY_HOPS=3` and starts the API without proxy-header trust (so callers cannot spoof their address
    for rate limits). After the first deploy, open **Admin → Diagnostics → Client address** and check it shows your own public IP.
 
 ## 5. First sign-in (5 min)

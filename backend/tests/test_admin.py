@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 
+import pytest
 from openpyxl import Workbook
 
 from tests.conftest import User, png_bytes
@@ -292,3 +293,24 @@ async def test_diagnostics_admin_only_and_secret_free(admin: User, inspector: Us
     body = str(results).lower()
     assert "mongodb://" not in body and "private_key" not in body
     assert (await admin.post("/api/v1/admin/diagnostics/nope")).status_code == 404
+
+
+async def test_diagnostics_flags_internal_client_address(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The measured Render chain is client, Cloudflare, Render edge, internal proxy: hops=1 picks an internal address."""
+    from types import SimpleNamespace
+
+    from app.config import get_settings
+    from app.services import diagnostics
+
+    s = get_settings()
+    monkeypatch.setattr(s, "app_env", "production")
+    req = SimpleNamespace(
+        client=SimpleNamespace(host="127.0.0.1"),
+        headers={"x-forwarded-for": "93.184.216.34, 172.69.1.1, 10.31.1.1"},
+    )
+    monkeypatch.setattr(s, "trusted_proxy_hops", 1)
+    bad = diagnostics.check_network(req)
+    assert bad["status"] == "warn" and "Set TRUSTED_PROXY_HOPS to 3" in bad["hints"][0]
+    monkeypatch.setattr(s, "trusted_proxy_hops", 3)
+    good = diagnostics.check_network(req)
+    assert good["status"] == "ok" and "93.184.216.34" in good["detail"]

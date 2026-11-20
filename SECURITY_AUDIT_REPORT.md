@@ -67,7 +67,7 @@ it does not replace a test against the live Firebase project.
 |--------|-------|-------------|
 | 50 MP pixel cap before decoding | `app/services/images.py` | exploit rerun → 413; backend + attack tests |
 | NUL-safe literal search (`rx_escape`) | `app/repositories/base.py` + 5 repositories | exploit rerun → 200; tests |
-| Trusted-proxy aware rate-limit key; `--no-proxy-headers`; `TRUSTED_PROXY_HOPS` (Render = 1) | `app/ratelimit.py`, `config.py`, `main.py`, `render.yaml`, CI, `.env.example` | exploit rerun → 429; unit + attack tests |
+| Trusted-proxy aware rate-limit key; `--no-proxy-headers`; `TRUSTED_PROXY_HOPS` (Render = 3, measured on the live site) | `app/ratelimit.py`, `config.py`, `main.py`, `render.yaml`, CI, `.env.example` | exploit rerun → 429; unit + attack tests |
 | Fail-fast without Firebase credentials; 503 instead of crash | `app/auth.py`; CI start check uses a throwaway fake service account (`security-tests/fake_service_account.py`) | unit test; production-mode instance |
 | Strict `google.com` provider | `app/auth.py` | full suites |
 | Safe link schemes | `frontend/src/app/inspector/ask/page.tsx` | lint, types, browser suite |
@@ -183,7 +183,7 @@ Reading the matrix: every `admin` route returns 401/403 for ANON, PENDING and IN
 2. **Protect `main` (SEC-005):** GitHub → Settings → Branches → rule for `main`: require a pull request, require the status checks `Quality`, `Tests`, `Security`, `CodeQL (python)`, `CodeQL (javascript-typescript)`, `Build`; block force pushes and deletions.
 3. **Atlas (SEC-007):** confirm the app user has `readWrite` on `crate_scan` only; strong password; separate users for any other environment; note free tier has no backups.
 4. **Firebase (C18/C7):** Google provider only; anonymous auth off; authorised domains = your real site only (remove `localhost` if unused); confirm Firestore / Realtime Database / Cloud Storage are **disabled or deny-all**; restrict the web API key to your site's referrer; keep one service-account key.
-5. **Render:** confirm `APP_ENV=production`, `TRUSTED_PROXY_HOPS=1`, no preview environments; after deploy open **Admin → Diagnostics → Client address** and confirm it shows *your* public IP (if it shows a Render/Cloudflare address, raise the hop count).
+5. **Render:** confirm `APP_ENV=production`, `TRUSTED_PROXY_HOPS=3`, no preview environments; after deploy open **Admin → Diagnostics → Client address** and confirm it shows *your* public IP (if it shows a Render/Cloudflare address, raise the hop count).
 6. **GitHub:** enable Dependabot security updates (SEC-012); verify the `production`-style secrets list is empty (none are needed).
 7. Run the new attack suite in CI by committing these changes (not done here) and review the first run.
 8. Run a live check of Google sign-in under the CSP; if blocked, set `CSP_REPORT_ONLY=true`.

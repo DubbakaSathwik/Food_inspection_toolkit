@@ -51,9 +51,10 @@ services:
         sync: false
       - key: OCR_ENABLED
         value: "false"
-      # One Render proxy sits in front of the API; the rate limiter reads the client address it appended (SEC-003).
+      # Render's chain is client -> Cloudflare -> Render edge -> internal proxy -> app, so the real client is the 3rd
+      # entry from the right of X-Forwarded-For (measured with Admin -> Diagnostics -> Client address; SEC-003).
       - key: TRUSTED_PROXY_HOPS
-        value: "1"
+        value: "3"
       - key: RATE_LIMIT_DEFAULT
         value: 240/minute
       - key: RATE_LIMIT_WRITE
