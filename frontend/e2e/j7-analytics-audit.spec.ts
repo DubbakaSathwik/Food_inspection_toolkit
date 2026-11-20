@@ -62,3 +62,16 @@ test("diagnostics: run all checks and see database working, unconfigured AI not 
   await page.getByRole("button", { name: "Test Configuration" }).click();
   await expect(page.getByRole("status", { name: "Configuration result" })).toBeVisible();
 });
+
+test("diagnostics is reachable from the navigation on desktop and on a phone", async ({ page }) => {
+  await page.goto("/admin/settings");
+  await page
+    .getByRole("link", { name: /Diagnostics/ })
+    .filter({ visible: true })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/admin\/diagnostics/);
+  await expect(page.getByRole("heading", { name: "System diagnostics" })).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow, "no horizontal scrolling").toBeLessThanOrEqual(0);
+});

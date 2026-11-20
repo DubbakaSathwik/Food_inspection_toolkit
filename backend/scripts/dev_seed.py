@@ -12,6 +12,10 @@ import httpx
 from PIL import Image, ImageDraw, ImageFilter
 
 API = os.environ.get("SEED_API", "http://localhost:8000")
+if not API.startswith(("http://localhost", "http://127.0.0.1")):
+    raise SystemExit(
+        "dev_seed only runs against a LOCAL API (it creates demo accounts and data). Never use it on a real deployment."
+    )
 EMU = os.environ.get("SEED_EMULATOR", "http://127.0.0.1:9099")
 
 
