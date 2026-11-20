@@ -6,6 +6,7 @@ contains keys, passwords or connection strings."""
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -172,6 +173,14 @@ async def check_ocr() -> Result:
     )
 
 
+def _is_internal(addr: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(addr)
+    except ValueError:
+        return False
+    return ip.is_private or ip.is_loopback or ip.is_link_local
+
+
 def check_network(request: Any) -> Result:
     """Shows which address the rate limiter attributes to the admin's own request, so TRUSTED_PROXY_HOPS can be verified."""
     s = get_settings()
@@ -187,31 +196,15 @@ def check_network(request: Any) -> Result:
         f"Connection from {peer}; X-Forwarded-For: {xff or 'none'}; "
         f"rate limits treat this request as {chosen} (TRUSTED_PROXY_HOPS={s.trusted_proxy_hops})."
     )
-    if s.is_production and s.trusted_proxy_hops and chosen == peer:
-        return _r(
-            "warn",
-            detail,
-            [
-                "TRUSTED_PROXY_HOPS is set but the header was not found; check the number of proxies."
-            ],
-        )
-    if s.is_production and not s.trusted_proxy_hops and xff:
-        return _r(
-            "warn",
-            detail + " All users behind the proxy share one limit.",
-            ["Set TRUSTED_PROXY_HOPS=1 on Render so each client gets its own limit."],
-        )
-    if (
-        s.is_production
-        and s.trusted_proxy_hops
-        and chosen != str(request.client.host if request.client else "")
-    ):
-        return _r(
-            "ok",
-            detail
-            + " It should be YOUR public IP address; if it is a Render/Cloudflare address, raise TRUSTED_PROXY_HOPS.",
-        )
-    return _r("ok", detail)
+    if not s.is_production:
+        return _r("ok", detail)
+    if xff and not s.trusted_proxy_hops:
+        hint = f"Set TRUSTED_PROXY_HOPS to {len(parts)} so each visitor gets their own limit."
+        return _r("warn", detail + " All users share one limit.", [hint])
+    if xff and _is_internal(chosen):
+        hint = f"The chosen address is internal, so all users would share one limit. Set TRUSTED_PROXY_HOPS to {len(parts)}."
+        return _r("warn", detail, [hint])
+    return _r("ok", detail + " This should be your own public address.")
 
 
 CHECKS: list[tuple[str, str, str, Callable[[], Awaitable[Result]]]] = [

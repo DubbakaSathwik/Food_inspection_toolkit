@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+import pytest
+
 from app.services import classification, compliance, matching
 from app.services.fields import ean13_valid, normalise_quantity, parse_date, validate_field
 
@@ -185,3 +187,32 @@ async def test_validator_rejects_bad_document() -> None:
         await get_db()["inspections"].insert_one(
             {"_id": "bad", "owner_uid": "x", "status": "weird"}
         )
+
+
+async def test_demo_seed_migration_is_explicit_only_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A new production database must not receive fictional demo data unless ALLOW_DEMO_SEED=true."""
+    from types import SimpleNamespace
+
+    from app.config import get_settings
+    from migrations import m0003_seed_demo as seed
+
+    touched: list[str] = []
+
+    class Col:
+        async def update_one(self, *a: object, **k: object) -> None:
+            touched.append("write")
+
+    class Db:
+        def __getitem__(self, name: str) -> Col:
+            return Col()
+
+    monkeypatch.setattr(get_settings(), "app_env", "production")
+    monkeypatch.delenv("ALLOW_DEMO_SEED", raising=False)
+    await seed.up(Db())  # type: ignore[arg-type]
+    assert touched == []
+    monkeypatch.setenv("ALLOW_DEMO_SEED", "true")
+    await seed.up(Db())  # type: ignore[arg-type]
+    assert touched, "explicit opt-in must still seed"
+    del SimpleNamespace

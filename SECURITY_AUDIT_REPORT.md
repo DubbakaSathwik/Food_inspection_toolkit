@@ -38,9 +38,9 @@
 ## 3. Findings
 | ID | Severity | Title | Location | Status |
 |----|----------|-------|----------|--------|
-| SEC-006 | **CRITICAL** | Live secrets pasted into a chat: Firebase service-account private key (key id `c6a9…023f`), Atlas user password (`57jJ…aMPE`), Gemini key (`AQ.A…LgFQ`), NVIDIA key (`nvap…DHQd`), Hugging Face token (`hf_j…teUN`) — shown 3×, plus a Gemini key in later messages | owner's local `backend/.env` shared in conversation | **Open** — rotation not confirmed |
-| SEC-005 | **HIGH** | `main` has no branch protection: direct and force pushes allowed, no required checks or reviews, on a **public** repo whose pushes auto-deploy | GitHub settings | **Open** (owner action) |
-| SEC-007 | MEDIUM | Atlas must allow `0.0.0.0/0` for Render free; safety then depends on an unverified least-privilege user and password | Atlas | **Open / NOT VERIFIED** |
+| SEC-006 | **CRITICAL** | Live secrets pasted into a chat: Firebase service-account private key (key id `c6a9…023f`), Atlas user password (`57jJ…aMPE`), Gemini key (`AQ.A…LgFQ`), NVIDIA key (`nvap…DHQd`), Hugging Face token (`hf_j…teUN`) — shown 3×, plus a Gemini key in later messages | owner's local `backend/.env` shared in conversation | **Owner reports all keys rotated and the old Firebase key deleted (2026-11-20)**; I cannot verify rotation from here |
+| SEC-005 | **HIGH** | `main` has no branch protection: direct and force pushes allowed, no required checks or reviews, on a **public** repo whose pushes auto-deploy | GitHub settings | **Closed — verified** (ruleset `protect-main` active: PR required, 6 required checks, no force push or deletion, no bypass actors) |
+| SEC-007 | MEDIUM | Atlas must allow `0.0.0.0/0` for Render free; safety then depends on an unverified least-privilege user and password | Atlas | **Owner reports the Atlas user was restricted to `readWrite` on `crate_scan`**; not independently inspected |
 | SEC-001 | MEDIUM | Memory-exhaustion by one image: images up to ~120 MP were accepted and decoded (≈360 MB RGB) — any inspector could crash a 512 MB instance | `services/images.py` | **Fixed and verified** |
 | SEC-003 | MEDIUM | Rate limits bypassable by spoofing `X-Forwarded-For` (40/40 requests passed a 5/min limit with Render-style `--forwarded-allow-ips "*"`) | start command, `ratelimit.py` | **Fixed and verified locally**; production hop count to be confirmed via Diagnostics |
 | SEC-002 | LOW | `?q=%00` made MongoDB reject the regex; any signed-in user could trigger 503 "database unavailable" | all `re.escape` search sites | **Fixed and verified** |
@@ -49,7 +49,7 @@
 | SEC-009 | LOW | Ask-AI source links accepted any URL scheme | `ask/page.tsx` | **Fixed** |
 | SEC-010 | LOW | `sign_in_provider` of `None` was accepted | `auth.py` | **Fixed** (must be `google.com`) |
 | SEC-011 | LOW | `APP_ENV` defaults to `development`; if the variable were missing on Render, docs and the fake AI provider would be enabled | `config.py` | **Open** (blueprint sets `production`; Diagnostics shows it) |
-| SEC-012 | LOW | GitHub Dependabot **security updates** are disabled | GitHub settings | **Open** (owner action) |
+| SEC-012 | LOW | GitHub Dependabot **security updates** are disabled | GitHub settings | **Closed — verified** (Dependabot security updates enabled) |
 
 ### Reproduction of the fixed findings (identity → request → before → after)
 * **SEC-001** INSPECTOR → `POST /api/v1/inspections/{id}/photos` with an 8000×8000 (64 MP) PNG of ~60 KB → before: accepted (201, decoded); after: `413 image_too_large`. Regression: `backend/tests/test_inspections.py::test_pixel_bomb_is_rejected_before_decoding`, `security-tests/test_04_injection.py`.
@@ -67,7 +67,7 @@ it does not replace a test against the live Firebase project.
 |--------|-------|-------------|
 | 50 MP pixel cap before decoding | `app/services/images.py` | exploit rerun → 413; backend + attack tests |
 | NUL-safe literal search (`rx_escape`) | `app/repositories/base.py` + 5 repositories | exploit rerun → 200; tests |
-| Trusted-proxy aware rate-limit key; `--no-proxy-headers`; `TRUSTED_PROXY_HOPS` (Render = 1) | `app/ratelimit.py`, `config.py`, `main.py`, `render.yaml`, CI, `.env.example` | exploit rerun → 429; unit + attack tests |
+| Trusted-proxy aware rate-limit key; `--no-proxy-headers`; `TRUSTED_PROXY_HOPS` (Render = 3, measured on the live site) | `app/ratelimit.py`, `config.py`, `main.py`, `render.yaml`, CI, `.env.example` | exploit rerun → 429; unit + attack tests |
 | Fail-fast without Firebase credentials; 503 instead of crash | `app/auth.py`; CI start check uses a throwaway fake service account (`security-tests/fake_service_account.py`) | unit test; production-mode instance |
 | Strict `google.com` provider | `app/auth.py` | full suites |
 | Safe link schemes | `frontend/src/app/inspector/ask/page.tsx` | lint, types, browser suite |
@@ -183,7 +183,7 @@ Reading the matrix: every `admin` route returns 401/403 for ANON, PENDING and IN
 2. **Protect `main` (SEC-005):** GitHub → Settings → Branches → rule for `main`: require a pull request, require the status checks `Quality`, `Tests`, `Security`, `CodeQL (python)`, `CodeQL (javascript-typescript)`, `Build`; block force pushes and deletions.
 3. **Atlas (SEC-007):** confirm the app user has `readWrite` on `crate_scan` only; strong password; separate users for any other environment; note free tier has no backups.
 4. **Firebase (C18/C7):** Google provider only; anonymous auth off; authorised domains = your real site only (remove `localhost` if unused); confirm Firestore / Realtime Database / Cloud Storage are **disabled or deny-all**; restrict the web API key to your site's referrer; keep one service-account key.
-5. **Render:** confirm `APP_ENV=production`, `TRUSTED_PROXY_HOPS=1`, no preview environments; after deploy open **Admin → Diagnostics → Client address** and confirm it shows *your* public IP (if it shows a Render/Cloudflare address, raise the hop count).
+5. **Render:** confirm `APP_ENV=production`, `TRUSTED_PROXY_HOPS=3`, no preview environments; after deploy open **Admin → Diagnostics → Client address** and confirm it shows *your* public IP (if it shows a Render/Cloudflare address, raise the hop count).
 6. **GitHub:** enable Dependabot security updates (SEC-012); verify the `production`-style secrets list is empty (none are needed).
 7. Run the new attack suite in CI by committing these changes (not done here) and review the first run.
 8. Run a live check of Google sign-in under the CSP; if blocked, set `CSP_REPORT_ONLY=true`.
@@ -196,3 +196,14 @@ Core areas: token verification (tested, locally), role checks (tested), data-acc
 
 ## 10. Final verdict
 **NOT SAFE TO DEPLOY.** Live secrets were exposed in a chat and their rotation is unconfirmed (SEC-006), `main` is unprotected on a public repo that auto-deploys (SEC-005), and the Atlas user privileges and Firebase project settings — both core areas — could not be verified. The application code itself held up well against the attacks that were run, and the four code-level weaknesses found are fixed and verified; once items 1–4 in §8 are done and re-checked, this verdict can be re-evaluated.
+
+## 11. Update after owner actions (2026-11-20)
+Verified by me: `main` protected by the `protect-main` ruleset (pull request required, the six CI checks required, no force push, no deletion, no bypass actors);
+Dependabot security updates enabled; secret scanning and push protection enabled; CI green on `main` (PR #10) and on the audit and CSP-fix commits;
+gitleaks clean over the full history and no key-like strings in the tree; **Admin → Diagnostics → Client address on the live site shows the visitor's own
+public address with `TRUSTED_PROXY_HOPS=3`** (SEC-003 confirmed in production).
+Reported by the owner but **not inspected by me**: all exposed keys rotated and old Firebase service-account key deleted (SEC-006); Atlas user restricted to
+`readWrite` on `crate_scan`; Firebase Google-only sign-in, authorised domains, and Firestore / Realtime Database / Storage disabled or deny-all.
+Owner decision: the Firebase web API key is **not** being restricted in Google Cloud for now (accepted risk; the key is public by design and the API still requires an approved account).
+Strictly applied, the verdict criteria require core areas to be inspected rather than assumed, so the formal verdict stays at the level below until the three owner-reported
+items are shown (screenshots or read-only exports); the remaining risk is limited to the owner's own dashboard settings, not to the application code.

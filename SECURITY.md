@@ -18,7 +18,7 @@ reproduce. Rotate any exposed key first (see "Secrets" below).
 | First super admin | Only the verified Google email in `SUPER_ADMIN_EMAIL` (server env). Cannot be granted from the UI. | `repositories/users.py` |
 | Data isolation | Every inspector query goes through the repository layer with an `owner_uid` filter; another inspector's record returns 404 (not 403) so IDs cannot be probed. A test fails the build if a router touches MongoDB directly. | `app/repositories/*`, `tests/test_architecture.py` |
 | Input validation | Pydantic v2 models with `extra="forbid"`, length limits and enums; search text is matched with `re.escape` (no operator injection). Upload type is checked by content (Pillow), size limited (12 MB) and requests over the body limit get 413. | `app/models/*`, `main.py` |
-| Rate limiting | Per client address, fixed one-minute windows: 240 requests (all), 60 writes, 12 AI calls; 429 with `Retry-After`. `X-Forwarded-For` is ignored unless `TRUSTED_PROXY_HOPS` names how many of our proxies are in front (Render: 1), then read from the right. Plus an atomic per-user daily AI quota set by admins. | `app/ratelimit.py`, `repositories/usage.py` |
+| Rate limiting | Per client address, fixed one-minute windows: 240 requests (all), 60 writes, 12 AI calls; 429 with `Retry-After`. `X-Forwarded-For` is ignored unless `TRUSTED_PROXY_HOPS` names how many of our proxies are in front (Render: 3), then read from the right (Render: 3, measured with Diagnostics). Plus an atomic per-user daily AI quota set by admins. | `app/ratelimit.py`, `repositories/usage.py` |
 | CORS | Exact origin allow-list from `CORS_ALLOWED_ORIGINS`; no wildcard, no credentials (bearer tokens only). | `main.py` |
 | Headers | API: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, `Cache-Control: no-store`, HSTS in production. Site: CSP, HSTS, frame-deny etc. via `netlify.toml`. | `main.py`, `netlify.toml` |
 | API surface | `/docs` and `/openapi.json` are off in production. Errors use one JSON format without stack traces. | `main.py`, `errors.py` |
@@ -73,7 +73,7 @@ NUL-byte search 503, `X-Forwarded-For` rate-limit bypass, crash on missing Fireb
 2. Protect `main` (pull request + required checks + no force push); enable Dependabot security updates.
 3. Atlas: app user `readWrite` on `crate_scan` only; network access `0.0.0.0/0` is an **accepted risk** on Render free (compensated by a long random password, TLS and the least-privilege user — verify them); no backups on the free tier.
 4. Firebase: Google provider only, anonymous auth off, authorised domains = the real site only, Firestore/Realtime Database/Cloud Storage disabled or deny-all, web API key restricted to the site, one service-account key.
-5. Render: `APP_ENV=production`, `TRUSTED_PROXY_HOPS=1`, no preview environments; confirm with **Admin → Diagnostics → Client address**.
+5. Render: `APP_ENV=production`, `TRUSTED_PROXY_HOPS=3`, no preview environments; confirm with **Admin → Diagnostics → Client address**.
 
 **Accepted risks:** in-memory rate limits (single instance); the web API key is public by design; the CSP allows inline scripts/styles (no nonce pipeline yet);
 the Firebase emulator accepts unsigned tokens (local only; production refuses the emulator host).

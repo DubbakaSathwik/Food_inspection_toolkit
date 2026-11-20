@@ -145,6 +145,7 @@ export default function SettingsPage() {
             ["/admin/rules", "rules", "Compliance Rules"],
             ["/admin/proposals", "proposal", "Product Proposals"],
             ["/admin/audit", "logs", "Audit Logs"],
+            ["/admin/diagnostics", "check", "System Diagnostics"],
           ] as [string, IconName, string][]
         ).map(([h, i, l]) => (
           <Link

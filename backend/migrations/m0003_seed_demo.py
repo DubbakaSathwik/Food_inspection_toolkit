@@ -5,10 +5,13 @@ regulations the demo rules are derived from; the owner must verify the exact wor
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from typing import Any
 
 from pymongo.asynchronous.database import AsyncDatabase
+
+from app.config import get_settings
 
 NOW = datetime(2026, 11, 1, tzinfo=UTC)
 LAB = "FSS (Labelling & Display) Regulations, 2020"
@@ -344,6 +347,10 @@ RULES = [
 
 
 async def up(db: AsyncDatabase) -> None:  # type: ignore[type-arg]
+    # Fictional demo data must never appear in production by accident: there it needs ALLOW_DEMO_SEED=true.
+    # (On a production database where this migration was already applied nothing changes.)
+    if get_settings().app_env == "production" and os.environ.get("ALLOW_DEMO_SEED") != "true":
+        return
     for r in REFERENCES:
         await db["reference_records"].update_one(
             {"_id": r["_id"]}, {"$setOnInsert": r}, upsert=True
